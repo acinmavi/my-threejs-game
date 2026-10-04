@@ -4,3 +4,5 @@
 .lock .art img{transform:none;object-position:center}.lock .art{background:#203e3b}
 
 .claw .art img{transform:none;object-position:center}.claw .art{background:#becfc2}
+
+.pusher .art{background:#aabfbb}.pusher .art img{object-fit:contain}

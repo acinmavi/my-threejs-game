@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#f2f3e9" />
+    <title>Infinity Pusher · Sky Club</title>
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <a class="brand" href="/"
+          ><span>✦</span> SKY CLUB <small>ARCADE / 005</small></a
+        ><button id="sound" aria-label="Bật âm thanh" aria-pressed="false">
+          ♪ Âm thanh: tắt
+        </button>
+      </header>
+      <section class="intro">
+        <div>
+          <div class="eyebrow">MỘT ĐỒNG XU. CẢ MỘT DÂY CHUYỀN.</div>
+          <h1>Infinity <em>Pusher</em><i>↗</i></h1>
+          <p>Căn nhịp bắn. Đẩy xu và đá về phía bạn.</p>
+        </div>
+        <div class="record">
+          <span>KỶ LỤC ĐIỂM</span><strong id="best">00</strong>
+        </div>
+      </section>
+      <section class="game-frame" aria-label="Máy đẩy xu 3D">
+        <div id="world"></div>
+        <div class="hud">
+          <span id="tokens">50 XU</span><span id="score">0 ĐIỂM</span
+          ><span id="wheel-status">ĐÈN MỤC TIÊU +2 XU</span
+          ><button id="pause" aria-label="Tạm dừng" disabled>Ⅱ</button>
+        </div>
+        <div class="stones" aria-label="Đá đã thu thập">
+          <span id="stone-label">ĐÁ 0 · BỘ 0/6</span>
+          <div id="stone-list"></div>
+          <b id="bonus">6 ĐÁ BẤT KỲ → SUPER BONUS</b>
+        </div>
+        <div id="overlay">
+          <span id="card-label">50 XU · ĐÁ NÀO CŨNG TÍNH</span>
+          <h2 id="card-title">Một cú đẩy nữa.</h2>
+          <p id="card-copy">
+            Chọn vị trí bắn bằng thanh trượt hoặc ← → / A D. Bấm Space / BẮN XU
+            khi đèn trên vòng trùng mũi tên vàng để nhận +2 xu. Xu rơi cửa trước
+            cho điểm và xu mới; rơi khe bên bị mất. Mỗi đá mở Bonus Spin, đủ sáu
+            đá nhận Super Bonus.
+          </p>
+          <button id="play">Bắt đầu ván →</button>
+        </div>
+        <div id="tip" aria-live="polite">
+          Căn nhịp bàn đẩy. Bắn gần giữa để tránh khe hai bên.
+        </div>
+      </section>
+      <div class="controls">
+        <label class="aim-control" for="aim"
+          ><span>VỊ TRÍ BẮN <b id="aim-value">GIỮA</b></span
+          ><input
+            id="aim"
+            type="range"
+            min="-2.1"
+            max="2.1"
+            step="0.05"
+            value="0"
+            disabled
+          /><small>← → / A D · TRÁI — GIỮA — PHẢI</small></label
+        ><button id="fire" disabled>
+          BẮN XU <small>SPACE · 1 XU / LẦN</small>
+        </button>
+      </div>
+      <footer>
+        <span>Xu cửa trước: +1 điểm +1 xu · Đá: +20 điểm và Bonus Spin</span
+        ><span>P tạm dừng · Esc về Home</span>
+      </footer>
+    </main>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

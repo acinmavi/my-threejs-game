@@ -9,5 +9,6 @@ export default defineConfig({
     crossy: entry('./games/crossy-three/index.html'),
     lock: entry('./games/pop-the-lock/index.html'),
     claw: entry('./games/claw-machine/index.html'),
+    pusher: entry('./games/coin-pusher/index.html'),
   } } },
 });

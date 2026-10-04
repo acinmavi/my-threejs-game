@@ -1,0 +1,207 @@
+@import "../../pop-the-lock/src/style.css";
+h1 {
+  font-size: 49px;
+}
+.game-frame {
+  height: 620px;
+  background: #a6bdba;
+}
+.hud {
+  color: #29463b;
+  background: #f8f9efed;
+  padding: 10px 12px;
+  border-radius: 12px;
+  gap: 15px;
+}
+.hud #tokens {
+  font-size: 16px;
+  font-weight: 800;
+  color: #9e7337;
+}
+.hud #score {
+  font-weight: 800;
+}
+.hud #wheel-status {
+  margin-left: auto;
+  font-size: 8px;
+  color: #718875;
+  letter-spacing: 0.5px;
+}
+.stones {
+  position: absolute;
+  top: 86px;
+  left: 25px;
+  background: #f8f9efdf;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 8px;
+  letter-spacing: 1px;
+  max-width: 205px;
+}
+.stones > span {
+  font-weight: 700;
+}
+#stone-list {
+  display: flex;
+  gap: 8px;
+  margin: 9px 0;
+}
+.stone {
+  width: 15px;
+  height: 18px;
+  clip-path: polygon(50% 0, 100% 35%, 82% 85%, 50% 100%, 18% 85%, 0 35%);
+  opacity: 0.2;
+  background: var(--color);
+}
+.stone.collected {
+  opacity: 1;
+  filter: drop-shadow(0 0 3px var(--color));
+}
+#bonus {
+  font-size: 7px;
+  color: #a27939;
+  letter-spacing: 0.3px;
+}
+#overlay {
+  top: 53%;
+  width: 365px;
+}
+#tip {
+  bottom: 17px;
+  margin: auto;
+  max-width: 750px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: #f8f9efed;
+  color: #37574d;
+  line-height: 1.6;
+}
+.controls {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 23px;
+}
+.aim-control {
+  width: 350px;
+  font-size: 9px;
+  color: #6a7f70;
+}
+.aim-control > span {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.aim-control b {
+  color: #aa8245;
+  font-size: 8px;
+}
+#aim {
+  width: 100%;
+  margin: 12px 0 9px;
+  accent-color: #426855;
+  touch-action: pan-y;
+}
+.aim-control small {
+  display: block;
+  font-size: 7px;
+  letter-spacing: 0.5px;
+}
+#fire {
+  border: 0;
+  background: #315745;
+  color: #fff4cf;
+  padding: 17px 24px;
+  border-radius: 13px;
+  font-weight: 800;
+  font-size: 13px;
+  touch-action: none;
+  user-select: none;
+}
+#fire small {
+  display: block;
+  font-size: 7px;
+  letter-spacing: 0.6px;
+  margin-top: 6px;
+  color: #cbd4b1;
+}
+#fire:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+footer {
+  font-size: 9px;
+}
+@media (max-width: 700px) {
+  h1 {
+    font-size: 32px;
+  }
+  .intro p {
+    max-width: 200px;
+  }
+  .game-frame {
+    height: 62vh;
+    min-height: 450px;
+    max-height: 600px;
+  }
+  .hud {
+    inset: 12px 12px auto;
+    gap: 9px;
+    letter-spacing: 0.3px;
+  }
+  .hud #tokens {
+    font-size: 13px;
+  }
+  .hud #wheel-status {
+    font-size: 6px;
+    max-width: 74px;
+    text-align: center;
+  }
+  .stones {
+    top: 71px;
+    left: 13px;
+    padding: 8px;
+    font-size: 7px;
+    max-width: 175px;
+  }
+  #stone-list {
+    gap: 7px;
+    margin: 7px 0;
+  }
+  .stone {
+    width: 12px;
+    height: 15px;
+  }
+  #bonus {
+    font-size: 6px;
+  }
+  #tip {
+    bottom: 12px;
+    font-size: 8px;
+    max-width: calc(100% - 25px);
+  }
+  #overlay {
+    top: 55%;
+  }
+  .controls {
+    gap: 14px;
+  }
+  .aim-control {
+    width: 55%;
+    font-size: 8px;
+  }
+  #fire {
+    padding: 15px 12px;
+    font-size: 11px;
+  }
+  #fire small {
+    font-size: 6px;
+    max-width: 105px;
+    line-height: 1.7;
+  }
+  footer {
+    font-size: 8px;
+  }
+}
