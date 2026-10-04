@@ -23,7 +23,8 @@ export function bonusLabel(reward) {
 }
 export const FRONT = 2.55;
 export const SIDE = 2.55;
-export const MAX_PIECES = 420;
+export const MAX_PIECES = 260;
+export const STONE_THRESHOLD = 50;
 export const SHOT_DELAY = 0.7;
 export const UPPER_Y = 0.6;
 const TAU = Math.PI * 2;
@@ -127,18 +128,18 @@ export function createGame(random = Math.random, populated = true) {
       "Thả xu qua vòng quay. Xu thưởng rơi lên bàn trên rồi đẩy xuống bàn dưới.",
   };
   if (populated) {
-    game.initialCoins = Math.round((157 + Math.floor(random() * 31)) * 1.5);
-    // 120 lower coins reach the front ledge; 60 coins already sit on the moving shelf.
-    for (let row = 0; row < 10; row++)
+    game.initialCoins = 156 + Math.floor(random() * 25);
+    // Keep the front ledge populated without deep, expensive stacks.
+    for (let row = 0; row < 8; row++)
       for (let col = 0; col < 12; col++)
         addPiece(
           game,
           "coin",
           (col - 5.5) * 0.39 + (random() - 0.5) * 0.03,
           0.055,
-          -0.9 + row * 0.38 + (random() - 0.5) * 0.025,
+          -0.15 + row * 0.38 + (random() - 0.5) * 0.025,
         );
-    for (let row = 0; row < 5; row++)
+    for (let row = 0; row < 4; row++)
       for (let col = 0; col < 12; col++)
         addPiece(
           game,
@@ -147,21 +148,22 @@ export function createGame(random = Math.random, populated = true) {
           UPPER_Y + 0.055,
           -2.52 + row * 0.35,
         );
-    for (let i = 180; i < game.initialCoins; i++)
+    for (let i = 144; i < game.initialCoins; i++)
       addPiece(
         game,
         "coin",
         (random() - 0.5) * 4.2,
-        0.17 + Math.floor((i - 180) / 35) * 0.08,
+        0.17 + Math.floor((i - 144) / 35) * 0.08,
         -0.5 + random() * 2.9,
       );
-    for (let i = 0; i < 9; i++)
+    const initialStones = 4 + Math.floor(random() * 2);
+    for (let i = 0; i < initialStones; i++)
       addPiece(
         game,
         "stone",
         ((i % 3) - 1) * 1.35 + (random() - 0.5) * 0.25,
         0.45,
-        0.5 + Math.floor(i / 3) * 0.8,
+        1.3 + Math.floor(i / 3) * 0.8,
         Math.floor(random() * COLORS.length),
       );
     for (let i = 0; i < 45; i++) world.step(1 / 60);
@@ -206,11 +208,12 @@ function collect(game, piece, front) {
     game.score++;
     game.frontCoins++;
     game.grace = 0;
-    if (game.frontCoins % 20 === 0) {
+    if (game.frontCoins % STONE_THRESHOLD === 0) {
       game.pendingStones++;
-      game.message = "Đủ 20 xu cửa trước! Máy thả thêm một đá ngẫu nhiên.";
+      game.message =
+        "Đủ 50 điểm từ xu cửa trước! Máy thả thêm một đá ngẫu nhiên.";
     } else
-      game.message = `Xu cửa trước: +1 điểm. Tiến độ đá ${game.frontCoins % 20}/20 xu.`;
+      game.message = `Xu cửa trước: +1 điểm. Tiến độ đá ${game.frontCoins % STONE_THRESHOLD}/${STONE_THRESHOLD} điểm từ xu.`;
   } else {
     game.collected++;
     game.score += 20;

@@ -29,12 +29,13 @@ function seeded() {
   };
 }
 
-test("round starts with 50 credits, 50% more board coins and nine stones", () => {
+test("round starts lighter with 50 credits, 156–180 coins and four or five stones", () => {
   const g = createGame(seeded());
   assert.equal(g.tokens, 50);
   assert.equal(g.phase, "ready");
-  assert.ok(g.initialCoins >= 236 && g.initialCoins <= 281);
-  assert.equal(g.pieces.filter((p) => p.kind === "stone").length, 9);
+  assert.ok(g.initialCoins >= 156 && g.initialCoins <= 180);
+  assert.ok([4, 5].includes(g.pieces.filter((p) => p.kind === "stone").length));
+  assert.equal(MAX_PIECES, 260);
   assert.ok(
     g.pieces.filter((p) => p.kind === "coin" && p.body.position.y > 0.5)
       .length >= 30,
@@ -105,9 +106,10 @@ test("front coin rewards exactly once and side losses do not advance stone progr
   assert.equal(g.lost, 1);
   assert.equal(g.frontCoins, 1);
 });
-test("every twenty front coins create one random stone, including repeated milestones", () => {
+test("every fifty coin points create one random stone, ignoring other points", () => {
   const g = fresh();
-  for (let i = 0; i < 19; i++) {
+  g.score = 500; // Bonus points never advance the coin-only milestone.
+  for (let i = 0; i < 49; i++) {
     fall(g);
     step(g, 1 / 60);
   }
@@ -115,15 +117,15 @@ test("every twenty front coins create one random stone, including repeated miles
   fall(g);
   step(g, 1 / 60);
   step(g, 1 / 60);
-  assert.equal(g.frontCoins, 20);
+  assert.equal(g.frontCoins, 50);
   assert.equal(g.generatedStones, 1);
   assert.equal(g.pieces.filter((p) => p.kind === "stone").length, 1);
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 100; i++) {
     fall(g);
     step(g, 1 / 60);
   }
   advance(g, 0.4);
-  assert.equal(g.frontCoins, 60);
+  assert.equal(g.frontCoins, 150);
   assert.equal(g.generatedStones, 3);
   assert.equal(g.pieces.filter((p) => p.kind === "stone").length, 3);
 });

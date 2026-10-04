@@ -7,6 +7,7 @@ import {
   setAim,
   COLORS,
   MAX_PIECES,
+  STONE_THRESHOLD,
   WHEEL_VALUES,
   wheelAward,
   BONUS_REWARDS,
@@ -35,7 +36,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color("#aabfbb");
 const camera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 60);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 $("world").appendChild(renderer.domElement);
@@ -43,7 +44,7 @@ scene.add(new THREE.HemisphereLight("#fff7d7", "#648d86", 2.7));
 const sun = new THREE.DirectionalLight("#fff4d4", 3);
 sun.position.set(-4, 9, 6);
 sun.castShadow = true;
-sun.shadow.mapSize.set(1024, 1024);
+sun.shadow.mapSize.set(512, 512);
 Object.assign(sun.shadow.camera, { left: -6, right: 6, top: 6, bottom: -6 });
 scene.add(sun);
 const materialCache = new Map();
@@ -509,7 +510,8 @@ function frame(now) {
       : game.lastWheel
         ? `Ô VỪA TRÚNG: ${game.lastWheel} XU`
         : `Ô ĐANG QUA: ${wheelAward(game.wheel)} XU`;
-  $("stone-progress").textContent = `${game.frontCoins % 20}/20 XU → ĐÁ MỚI`;
+  $("stone-progress").textContent =
+    `${game.frontCoins % STONE_THRESHOLD}/${STONE_THRESHOLD} ĐIỂM TỪ XU → ĐÁ MỚI`;
   $("tip").textContent = game.message;
   $("aim-value").textContent =
     Math.abs(game.aim) < 0.15
