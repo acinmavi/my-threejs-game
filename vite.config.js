@@ -8,5 +8,6 @@ export default defineConfig({
     flappy: entry('./games/flappy-three/index.html'),
     crossy: entry('./games/crossy-three/index.html'),
     lock: entry('./games/pop-the-lock/index.html'),
+    claw: entry('./games/claw-machine/index.html'),
   } } },
 });

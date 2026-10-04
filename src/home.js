@@ -2,6 +2,7 @@ import './home.css';
 import flappyPreview from '../games/flappy-three/preview.jpg';
 import crossyPreview from '../games/crossy-three/preview.jpg';
 import lockPreview from '../games/pop-the-lock/preview.svg';
+import clawPreview from '../games/claw-machine/preview.svg';
 
 const games = [
   { title:'Flappy 3D', number:'001', tag:'GIỮ NHỊP · BAY XA', image:flappyPreview,
@@ -9,6 +10,7 @@ const games = [
   { title:'Crossy 3D', number:'002', tag:'NHÌN HAI BÊN · TIẾN LÊN', image:crossyPreview,
     href:'/games/crossy-three/', key:'crossy-sky-best', description:'Né xe, nhảy lên gỗ và đợi tàu qua. Mỗi bước tiến là một cuộc phiêu lưu mới.', controls:'WASD / MŨI TÊN / VUỐT', theme:'meadow' },
   { title:'Pop the Lock', number:'003', tag:'ĐÚNG NHỊP · MỞ KHÓA', image:lockPreview, href:'/games/pop-the-lock/', key:'pop-lock-endless-best', description:'Bắt đúng nhịp, trúng đổi chiều. Endless chơi liên tục, kim tăng tốc theo thời gian.', controls:'SPACE / CLICK / CHẠM', theme:'lock' },
+  { title:'Claw Club', number:'004', tag:'CĂN THẬT KỸ · GẮP THẬT CHẮC', image:clawPreview, href:'/games/claw-machine/', key:'claw-club-best', description:'Máy gắp gấu 3D. Ba lượt mỗi ván, càng yếu và gấu dễ tuột — căn thật kỹ trước khi gắp.', controls:'WASD / MŨI TÊN / CHẠM', theme:'claw' },
 ];
 document.getElementById('games').innerHTML = games.map(game => {
   let best = 0;

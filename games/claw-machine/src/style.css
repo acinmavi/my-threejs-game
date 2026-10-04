@@ -1,0 +1,144 @@
+@import "../../pop-the-lock/src/style.css";
+.game-frame {
+  height: 590px;
+  background: #b9ccc0;
+}
+.hud {
+  color: #29463b;
+  background: #f8f9efdf;
+  padding: 10px 12px;
+  border-radius: 12px;
+  align-items: center;
+  gap: 16px;
+}
+.hud #timer {
+  margin-left: auto;
+  font-size: 10px;
+}
+.hud #score {
+  font-weight: 800;
+}
+#tip {
+  color: #29463b;
+  background: #f8f9efdf;
+  border-radius: 12px;
+  padding: 9px;
+  margin: 0 auto;
+  max-width: 650px;
+}
+#overlay {
+  top: 50%;
+}
+#view {
+  position: absolute;
+  right: 22px;
+  bottom: 67px;
+  padding: 9px 13px;
+  border: 1px solid #b4c6b7;
+  border-radius: 20px;
+  background: #f8f9efeb;
+  color: #42634f;
+  font-size: 10px;
+}
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  align-items: center;
+  margin-top: 19px;
+}
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 48px);
+  grid-template-rows: repeat(2, 43px);
+  gap: 5px;
+}
+.dpad button {
+  border: 1px solid #b8c9ab;
+  border-radius: 9px;
+  background: #e4ecd6;
+  color: #42634f;
+  font-size: 21px;
+  touch-action: none;
+}
+.dpad button:first-child {
+  grid-column: 2;
+}
+.dpad button:nth-child(2) {
+  grid-column: 1;
+  grid-row: 2;
+}
+.dpad button:nth-child(3) {
+  grid-column: 2;
+  grid-row: 2;
+}
+.dpad button:nth-child(4) {
+  grid-column: 3;
+  grid-row: 2;
+}
+.dpad button:active {
+  background: #bfd5a3;
+}
+#grab {
+  border: 0;
+  border-radius: 13px;
+  background: #2e523e;
+  color: #fff7df;
+  padding: 19px 26px;
+  font-size: 13px;
+  font-weight: 800;
+  touch-action: manipulation;
+}
+#grab small {
+  display: block;
+  font-size: 8px;
+  letter-spacing: 1px;
+  margin-top: 7px;
+  color: #cad5b6;
+}
+#grab:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+footer {
+  font-size: 9px;
+}
+@media (max-width: 700px) {
+  .game-frame {
+    height: 60vh;
+    min-height: 450px;
+    max-height: 590px;
+  }
+  .hud {
+    inset: 12px;
+    font-size: 9px;
+    gap: 8px;
+  }
+  .hud #timer {
+    font-size: 8px;
+  }
+  #tip {
+    font-size: 9px;
+    bottom: 15px;
+  }
+  #view {
+    right: 13px;
+    bottom: 72px;
+    font-size: 9px;
+  }
+  .controls {
+    gap: 15px;
+  }
+  .dpad {
+    grid-template-columns: repeat(3, 43px);
+  }
+  #grab {
+    padding: 18px;
+  }
+  .intro p {
+    max-width: 205px;
+  }
+  footer {
+    font-size: 8px;
+  }
+}

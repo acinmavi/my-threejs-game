@@ -1,6 +1,6 @@
 # Sky Club
 
-Three.js arcade collection: Flappy 3D and Crossy 3D. Both games' Git histories are preserved through subtree imports.
+Three.js arcade collection: Flappy 3D, Crossy 3D, Pop the Lock and Claw Club. Both games' Git histories are preserved through subtree imports.
 
 ## Run
 
@@ -25,8 +25,10 @@ rtk npm run build
 rtk npm run preview
 ```
 
-The root Vite build produces all three pages and shares the Three.js bundle between games. Deploy `dist/` as a static site, or deploy this repository using the included Vercel configuration. No server or database is required.
+The root Vite build produces Home and all four game pages and shares the Three.js bundle between games. Deploy `dist/` as a static site, or deploy this repository using the included Vercel configuration. No server or database is required.
 
 The original standalone checkouts were moved from `Documents/Working` to `.archive/` as local recovery copies; `.archive/` is ignored by Git and excluded from deployment. Active source is under `games/`.
 
 Pop the Lock: `/games/pop-the-lock/` — bấm đúng nhịp, đổi chiều sau mỗi lần trúng; mặc định Endless, có thể chọn Theo màn; Space/click/chạm, P pause, Esc về Home.
+
+Claw Club: `/games/claw-machine/` — máy gắp gấu 3D, 3 lượt/ván, 20 giây căn; WASD/nút chạm di chuyển, Space gắp, P pause, Esc Home.
