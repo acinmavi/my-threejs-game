@@ -6,12 +6,14 @@ Chạy từ thư mục root của Sky Club bằng npm run dev.
 
 ## Chế độ tăng tốc theo thời gian
 
-Dễ: +0.075 rad/s mỗi 10 giây. Thường (mặc định): +0.20 rad/s mỗi 10 giây. Khó: +0.40 rad/s mỗi 10 giây. Cùng tốc độ ban đầu, cùng quy tắc vùng trúng; khác nhịp tăng tốc. Tổng tốc độ (theo màn + thời gian) giới hạn 5.5 rad/s.
+Dễ: +0.075 rad/s mỗi 10 giây. Thường (mặc định): +0.20 rad/s mỗi 10 giây. Khó: +0.40 rad/s mỗi 10 giây. Siêu khó: +0.80 rad/s mỗi 10 giây. Cùng tốc độ ban đầu, cùng quy tắc vùng trúng; khác nhịp tăng tốc. Tổng tốc độ (theo màn + thời gian) giới hạn 5.5 rad/s.
 
 Chỉ tính thời gian đang chơi: pause, Esc, ẩn tab và màn kết quả không tăng tốc. Qua màn giữ thời gian; thử lại đặt thời gian về 0 và giữ màn. Đổi chế độ bắt đầu lại màn 1. Lựa chọn được lưu trong trình duyệt.
 
 ## Endless (mặc định)
 
-Endless bấm liên tục: mỗi lần trúng thêm 1 điểm, đổi chiều và tạo mục tiêu mới. Không dừng giữa màn; bấm sai hoặc để kim vượt vùng trúng sẽ kết thúc. Tốc độ tăng theo thời gian đang chơi với ba mức khó; vùng trúng giữ nguyên. Chơi lại đặt điểm và thời gian về 0. Kỷ lục Endless lưu riêng; Home hiển thị số lần trúng cao nhất.
+Endless bấm liên tục: mỗi lần trúng thêm 1 điểm, đổi chiều và tạo mục tiêu mới. Không dừng giữa màn; bấm sai hoặc để kim vượt vùng trúng sẽ kết thúc. Tốc độ tăng theo thời gian đang chơi với bốn mức khó; vùng trúng giữ nguyên. Chơi lại đặt điểm và thời gian về 0. Kỷ lục Endless lưu riêng; Home hiển thị số lần trúng cao nhất.
 
 Chọn “Theo màn” để chơi luật mở khóa theo màn như trước. Chuyển kiểu chơi hoặc mức khó bắt đầu lượt mới. Mỗi lần mở game mặc định Endless; mức khó gần nhất vẫn được lưu.
+
+Siêu khó dùng được trong cả Endless và Theo màn, tăng tốc nhanh gấp đôi Khó; giữ giới hạn 5.5 rad/s và cùng quy tắc bấm.

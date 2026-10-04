@@ -3,6 +3,7 @@ export const MODES = {
   easy: { label: 'Dễ', acceleration: .0075 },
   normal: { label: 'Thường', acceleration: .02 },
   hard: { label: 'Khó', acceleration: .04 },
+  extreme: { label: 'Siêu khó', acceleration: .08 },
 };
 export function createGame(level = 1, random = Math.random, { mode = 'normal', elapsed = 0, style = 'endless' } = {}) {
   if (!MODES[mode]) mode = 'normal';

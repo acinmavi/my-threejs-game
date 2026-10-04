@@ -42,7 +42,8 @@ test('all modes start equally and time acceleration is slow, medium, fast', () =
     assert.equal(g.elapsed, 10); speeds.push(g.speed);
     assert.ok(Math.abs(g.speed - (1.8 + MODES[mode].acceleration * 10)) < 1e-10);
   }
-  assert.ok(speeds[0] < speeds[1] && speeds[1] < speeds[2]);
+  assert.equal(speeds.length, 4);
+  for (let i = 1; i < speeds.length; i++) assert.ok(speeds[i - 1] < speeds[i]);
 });
 test('ready and finished games freeze elapsed time and speed', () => {
   const g = createGame();
@@ -74,4 +75,17 @@ test('endless retry resets score and active time, invalid style uses endless', (
   const retry = createGame(1, Math.random, { mode: 'hard' });
   assert.equal(retry.hits, 0); assert.equal(retry.elapsed, 0); assert.equal(retry.speed, 1.8);
   assert.equal(createGame(1, Math.random, { style: 'unknown' }).style, 'endless');
+});
+
+test('super hard accelerates twice as fast as hard in endless and levels', () => {
+  assert.equal(MODES.extreme.acceleration, MODES.hard.acceleration * 2);
+  for (const style of ['endless', 'levels']) {
+    const g = createGame(2, () => .5, { mode: 'extreme', style });
+    const initialSpeed = g.speed; g.phase = 'playing';
+    hit(g); assert.equal(g.phase, 'playing'); assert.equal(g.direction, -1);
+    assert.ok(g.speed > initialSpeed); assert.equal(g.mode, 'extreme');
+    hit(g); assert.equal(g.phase, style === 'endless' ? 'playing' : 'won');
+    const capped = createGame(2, Math.random, { mode: 'extreme', style, elapsed: 1000 });
+    assert.equal(capped.speed, 5.5);
+  }
 });

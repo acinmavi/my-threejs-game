@@ -85,7 +85,7 @@ function togglePause() {
   else { $('overlay').hidden = true; $('tap').disabled = false; }
   document.activeElement?.blur();
 }
-const modeDescriptions = { easy: 'Tăng chậm: +0.075 rad/s mỗi 10 giây chơi.', normal: 'Tăng vừa: +0.20 rad/s mỗi 10 giây chơi.', hard: 'Tăng nhanh: +0.40 rad/s mỗi 10 giây chơi.' };
+const modeDescriptions = { easy: 'Tăng chậm: +0.075 rad/s mỗi 10 giây chơi.', normal: 'Tăng vừa: +0.20 rad/s mỗi 10 giây chơi.', hard: 'Tăng nhanh: +0.40 rad/s mỗi 10 giây chơi.', extreme: 'Siêu khó: +0.80 rad/s mỗi 10 giây chơi.' };
 function updateSettings() {
   selectedMode = $('mode').value; selectedStyle = $('style').value; loadBest();
   $('mode-description').textContent = modeDescriptions[selectedMode];
