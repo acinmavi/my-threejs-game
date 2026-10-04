@@ -6,9 +6,15 @@ const $ = id => document.getElementById(id);
 let selectedMode = 'normal';
 try { const saved = localStorage.getItem('pop-lock-mode'); if (MODES[saved]) selectedMode = saved; } catch {}
 $('mode').value = selectedMode;
+let selectedStyle = 'endless';
 let game = createGame(1, Math.random, { mode: selectedMode }), paused = false, best = 0, muted = true, audio, last = 0;
-try { best = Number(localStorage.getItem('pop-lock-best')) || 0; } catch {}
-$('best').textContent = String(best).padStart(2, '0');
+function recordKey() { return selectedStyle === 'endless' ? 'pop-lock-endless-best' : 'pop-lock-best'; }
+function loadBest() {
+  best = 0; try { best = Number(localStorage.getItem(recordKey())) || 0; } catch {}
+  $('best').textContent = String(best).padStart(2, '0');
+  $('record-label').textContent = selectedStyle === 'endless' ? 'KỶ LỤC ENDLESS' : 'MÀN CAO NHẤT ĐÃ QUA';
+}
+loadBest();
 const scene = new THREE.Scene(); scene.background = new THREE.Color('#203e3b');
 const camera = new THREE.OrthographicCamera(-4, 4, 4, -4, .1, 30); camera.position.set(0, 0, 12);
 const renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); $('world').appendChild(renderer.domElement);
@@ -45,12 +51,13 @@ function tone(frequency) {
 function card(label, title, copy, button) {
   $('card-label').textContent = label; $('card-title').textContent = title; $('card-copy').textContent = copy;
   $('mode-picker').hidden = game.phase === 'playing';
+  $('style-picker').hidden = game.phase === 'playing';
   $('play').textContent = button; $('overlay').hidden = false; $('tap').disabled = true;
 }
 function start() {
-  const level = game.phase === 'won' ? game.level + 1 : game.phase === 'over' ? game.level : 1;
+  const level = selectedStyle === 'endless' ? 1 : game.phase === 'won' ? game.level + 1 : game.phase === 'over' ? game.level : 1;
   const elapsed = game.phase === 'won' ? game.elapsed : 0;
-  game = createGame(level, Math.random, { mode: selectedMode, elapsed }); game.phase = 'playing'; paused = false; last = 0;
+  game = createGame(level, Math.random, { mode: selectedMode, elapsed, style: selectedStyle }); game.phase = 'playing'; paused = false; last = 0;
   refreshZone(); $('overlay').hidden = true; $('tap').disabled = false; $('pause').disabled = false;
   $('pause').textContent = 'Ⅱ'; $('pause').setAttribute('aria-label', 'Tạm dừng');
   $('tip').textContent = 'Bấm khi kim nằm trong vùng xanh. Mỗi lần trúng sẽ đổi chiều.';
@@ -58,7 +65,11 @@ function start() {
 }
 function finish() {
   $('pause').disabled = true; $('tap').disabled = true;
-  if (game.phase === 'won') {
+  if (game.style === 'endless') {
+    best = Math.max(best, game.hits); try { localStorage.setItem(recordKey(), String(best)); } catch {}
+    $('best').textContent = String(best).padStart(2, '0'); tone(160);
+    card('ENDLESS · LỆCH MỘT NHỊP', 'Thử phá kỷ lục nhé.', `Bạn trúng ${game.hits} lần trong ${game.elapsed.toFixed(1)} giây. Kỷ lục: ${best} lần trúng.`, 'Chơi lại Endless →');
+  } else if (game.phase === 'won') {
     best = Math.max(best, game.level); try { localStorage.setItem('pop-lock-best', String(best)); } catch {}
     $('best').textContent = String(best).padStart(2, '0'); tone(880);
     card('MỞ KHÓA THÀNH CÔNG', 'Đúng nhịp rồi!', `Đã qua màn ${game.level}. Màn tiếp theo cần ${game.level + 1} lần trúng, kim nhanh hơn và vùng xanh hẹp hơn.`, `Màn ${game.level + 1} →`);
@@ -74,15 +85,18 @@ function togglePause() {
   else { $('overlay').hidden = true; $('tap').disabled = false; }
   document.activeElement?.blur();
 }
-const modeDescriptions = { easy: 'Tăng chậm: +0.15 rad/s mỗi 10 giây chơi.', normal: 'Tăng vừa: +0.40 rad/s mỗi 10 giây chơi.', hard: 'Tăng nhanh: +0.80 rad/s mỗi 10 giây chơi.' };
-function updateMode() {
-  selectedMode = $('mode').value;
+const modeDescriptions = { easy: 'Tăng chậm: +0.075 rad/s mỗi 10 giây chơi.', normal: 'Tăng vừa: +0.20 rad/s mỗi 10 giây chơi.', hard: 'Tăng nhanh: +0.40 rad/s mỗi 10 giây chơi.' };
+function updateSettings() {
+  selectedMode = $('mode').value; selectedStyle = $('style').value; loadBest();
   $('mode-description').textContent = modeDescriptions[selectedMode];
   try { localStorage.setItem('pop-lock-mode', selectedMode); } catch {}
-  game = createGame(1, Math.random, { mode: selectedMode }); refreshZone();
-  card('MỞ KHÓA ĐẦU TIÊN', 'Bắt đúng nhịp.', 'Bấm khi kim vàng nằm trong vùng xanh. Mỗi lần trúng, kim đổi chiều. Thời gian tăng tốc được giữ khi qua màn; thử lại sẽ đặt lại.', 'Bắt đầu →');
+  game = createGame(1, Math.random, { mode: selectedMode, style: selectedStyle }); refreshZone();
+  const endless = selectedStyle === 'endless';
+  $('tip').textContent = endless ? 'Endless: mỗi lần trúng thêm một điểm.' : 'Màn N cần N lần trúng liên tiếp.';
+  card(endless ? 'THỬ THÁCH KHÔNG GIỚI HẠN' : 'MỞ KHÓA ĐẦU TIÊN', 'Bắt đúng nhịp.', endless ? 'Bấm khi kim vàng nằm trong vùng xanh. Trúng đổi chiều và cộng điểm. Chơi liên tục tới khi bấm sai hoặc bỏ lỡ!' : 'Mỗi màn cần số lần trúng tăng dần. Qua màn giữ thời gian tăng tốc; thử lại đặt thời gian về 0.', 'Bắt đầu →');
 }
-$('mode').addEventListener('change', updateMode);
+$('mode').addEventListener('change', updateSettings);
+$('style').addEventListener('change', updateSettings);
 $('mode-description').textContent = modeDescriptions[selectedMode];
 $('play').addEventListener('click', () => paused ? togglePause() : start());
 $('tap').addEventListener('pointerdown', event => { event.preventDefault(); attempt(); });
@@ -104,7 +118,9 @@ function frame(now) {
   needle.position.set(Math.sin(game.angle) * 2, Math.cos(game.angle) * 2, .2); needle.rotation.z = -game.angle;
   target.position.set(Math.sin(game.target) * 2, Math.cos(game.target) * 2, .2);
   zone.rotation.z = Math.PI / 2 - game.target - game.tolerance;
-  $('remaining').textContent = game.level - game.hits; $('level').textContent = `MÀN ${String(game.level).padStart(2, '0')}`; $('speed').textContent = `${MODES[game.mode].label.toUpperCase()} · ${game.speed.toFixed(2)} RAD/S · ${Math.floor(game.elapsed)}s`;
+  $('remaining').textContent = game.style === 'endless' ? game.hits : game.level - game.hits;
+  $('counter-label').textContent = game.style === 'endless' ? 'LẦN TRÚNG' : 'LẦN CẦN BẤM';
+  $('level').textContent = game.style === 'endless' ? 'ENDLESS' : `MÀN ${String(game.level).padStart(2, '0')}`; $('speed').textContent = `${MODES[game.mode].label.toUpperCase()} · ${game.speed.toFixed(2)} RAD/S · ${Math.floor(game.elapsed)}s`;
   renderer.render(scene, camera); requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

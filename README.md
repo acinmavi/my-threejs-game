@@ -29,4 +29,4 @@ The root Vite build produces all three pages and shares the Three.js bundle betw
 
 The original standalone checkouts were moved from `Documents/Working` to `.archive/` as local recovery copies; `.archive/` is ignored by Git and excluded from deployment. Active source is under `games/`.
 
-Pop the Lock: `/games/pop-the-lock/` — bấm đúng nhịp, đổi chiều sau mỗi lần trúng, mở khóa theo màn; Space/click/chạm, P pause, Esc về Home.
+Pop the Lock: `/games/pop-the-lock/` — bấm đúng nhịp, đổi chiều sau mỗi lần trúng; mặc định Endless, có thể chọn Theo màn; Space/click/chạm, P pause, Esc về Home.

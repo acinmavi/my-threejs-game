@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createGame, step, tap, MODES } from '../src/game.js';
-const playing = level => { const g = createGame(level, () => .5); g.phase = 'playing'; return g; };
+const playing = level => { const g = createGame(level, () => .5, { style: 'levels' }); g.phase = 'playing'; return g; };
 const travelTime = (g, distance) => 2 * distance / (g.speed + Math.sqrt(g.speed ** 2 + 2 * MODES[g.mode].acceleration * distance));
 const hit = g => { step(g, travelTime(g, g.distance)); assert.equal(tap(g), true); };
 test('one accurate hit unlocks level one and stopped games ignore taps and time', () => {
@@ -20,7 +20,7 @@ test('target hit window accepts both early and late sides', () => {
   for (const side of [-1, 1]) { const g = playing(2); step(g, travelTime(g, g.distance + side * g.tolerance * .9)); assert.equal(tap(g), true); }
 });
 test('speed rises, target window narrows, and high levels stay capped', () => {
-  const first = createGame(1), later = createGame(15), high = createGame(1000);
+  const first = createGame(1, Math.random, { style: 'levels' }), later = createGame(15, Math.random, { style: 'levels' }), high = createGame(1000, Math.random, { style: 'levels' });
   assert.ok(later.speed > first.speed); assert.ok(later.tolerance < first.tolerance);
   assert.equal(high.speed, 5.5); assert.equal(high.tolerance, .075);
 });
@@ -30,7 +30,7 @@ test('frame partitioning does not change hits or angular motion across wrap', ()
   assert.ok(Math.abs(a.angle - b.angle) < 1e-10); assert.equal(tap(a), true); assert.equal(tap(b), true);
 });
 test('retries reset hits, direction and progress while retaining the level', () => {
-  const g = playing(4); hit(g); tap(g); const retry = createGame(g.level, () => .5);
+  const g = playing(4); hit(g); tap(g); const retry = createGame(g.level, () => .5, { style: 'levels' });
   assert.equal(retry.level, 4); assert.equal(retry.hits, 0); assert.equal(retry.direction, 1); assert.equal(retry.progress, 0); assert.equal(retry.phase, 'ready');
 });
 
@@ -49,14 +49,29 @@ test('ready and finished games freeze elapsed time and speed', () => {
   for (const phase of ['ready', 'over', 'won']) { g.phase = phase; step(g, 30); assert.equal(g.elapsed, 0); assert.equal(g.speed, 1.8); }
 });
 test('next levels retain active time, retries reset time, invalid mode falls back', () => {
-  const next = createGame(3, () => .5, { mode: 'hard', elapsed: 20 });
-  assert.equal(next.elapsed, 20); assert.ok(next.speed > createGame(3).speed);
+  const next = createGame(3, () => .5, { mode: 'hard', elapsed: 20, style: 'levels' });
+  assert.equal(next.elapsed, 20); assert.ok(next.speed > createGame(3, Math.random, { style: 'levels' }).speed);
   const retry = createGame(3, () => .5, { mode: 'hard' }); assert.equal(retry.elapsed, 0);
   assert.equal(createGame(1, Math.random, { mode: 'invalid' }).mode, 'normal');
 });
 test('acceleration crossing the speed cap is independent of frame partitioning', () => {
-  const a = createGame(1, () => .5, { mode: 'hard', elapsed: 45 }), b = createGame(1, () => .5, { mode: 'hard', elapsed: 45 });
+  const a = createGame(1, () => .5, { mode: 'hard', elapsed: 90 }), b = createGame(1, () => .5, { mode: 'hard', elapsed: 90 });
   a.phase = b.phase = 'playing'; a.distance = b.distance = 100;
   step(a, 5); for (let i = 0; i < 500; i++) step(b, .01);
   assert.equal(a.speed, 5.5); assert.equal(b.speed, 5.5); assert.ok(Math.abs(a.progress - b.progress) < 1e-9);
+});
+
+test('endless is default and successful hits never finish the run', () => {
+  const g = createGame(1, () => .5); assert.equal(g.style, 'endless'); g.phase = 'playing';
+  for (let i = 0; i < 25; i++) { hit(g); assert.equal(g.phase, 'playing'); assert.equal(g.hits, i + 1); }
+  assert.equal(g.direction, -1); assert.ok(g.elapsed > 0); assert.ok(g.speed > 1.8);
+  assert.equal(tap(g), false); assert.equal(g.phase, 'over');
+});
+test('all time acceleration rates are reduced by exactly half', () => {
+  assert.equal(MODES.easy.acceleration, .015 / 2); assert.equal(MODES.normal.acceleration, .04 / 2); assert.equal(MODES.hard.acceleration, .08 / 2);
+});
+test('endless retry resets score and active time, invalid style uses endless', () => {
+  const retry = createGame(1, Math.random, { mode: 'hard' });
+  assert.equal(retry.hits, 0); assert.equal(retry.elapsed, 0); assert.equal(retry.speed, 1.8);
+  assert.equal(createGame(1, Math.random, { style: 'unknown' }).style, 'endless');
 });
