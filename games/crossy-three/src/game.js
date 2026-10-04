@@ -3,6 +3,8 @@ export const DIFFICULTIES = {
   easy: { label: 'Dễ', startSpeed: 1, maxSpeed: 2.5, widthStep: 48, rampRows: 240, grace: 8, cameraSpeed: .2, cameraMax: .3, gapTime: 3 },
   normal: { label: 'Thường', startSpeed: 1.6, maxSpeed: 3.8, widthStep: 24, rampRows: 120, grace: 5, cameraSpeed: .45, cameraMax: .75, gapTime: 1.35 },
   hard: { label: 'Khó', startSpeed: 2.2, maxSpeed: 5.5, widthStep: 16, rampRows: 96, grace: 3, cameraSpeed: .8, cameraMax: 1.2, gapTime: .8 },
+  expert: { label: 'Rất khó', startSpeed: 3, maxSpeed: 7, widthStep: 12, rampRows: 72, grace: 2, cameraSpeed: 1.05, cameraMax: 1.55, gapTime: .6 },
+  extreme: { label: 'Siêu khó', startSpeed: 4, maxSpeed: 9, widthStep: 8, rampRows: 48, grace: 1.5, cameraSpeed: 1.3, cameraMax: 1.85, gapTime: .42 },
 };
 export function difficulty(row, mode = 'normal') {
   const settings = DIFFICULTIES[mode] ?? DIFFICULTIES.normal;

@@ -43,12 +43,14 @@ In the Sky Club collection, Escape and Home open an exit confirmation. Cancel re
 
 ## Độ khó
 
-Chọn Dễ / Thường / Khó trước khi bắt đầu hoặc chơi lại. Lựa chọn được lưu trên trình duyệt; lượt đang chơi không đổi độ khó. Mặc định Thường.
+Chọn Dễ / Thường / Khó / Rất khó / Siêu khó trước khi bắt đầu hoặc chơi lại. Lựa chọn được lưu trên trình duyệt; lượt đang chơi không đổi độ khó. Mặc định Thường.
 
 | Chế độ | Tốc độ xe ban đầu → tối đa | Đạt tốc độ tối đa | Đường đạt 5 làn | Camera bắt đầu kéo |
 | --- | --- | --- | --- | --- |
 | Dễ | 1× → 2.5× | 240 hàng | 144 hàng | Sau 8 giây |
 | Thường | 1.6× → 3.8× | 120 hàng | 72 hàng | Sau 5 giây |
 | Khó | 2.2× → 5.5× | 96 hàng | 48 hàng | Sau 3 giây |
+| Rất khó | 3× → 7× | 72 hàng | 36 hàng | Sau 2 giây |
+| Siêu khó | 4× → 9× | 48 hàng | 24 hàng | Sau 1.5 giây |
 
-Mỗi làn có tốc độ riêng. Khoảng trống xe có tối thiểu 3 / 1.35 / 0.8 giây theo chế độ, so với 0.18 giây mỗi bước nhảy. Camera tăng áp lực theo quãng đường và thời gian chơi, có giới hạn tốc độ.
+Mỗi làn có tốc độ riêng. Khoảng trống xe có tối thiểu 3 / 1.35 / 0.8 / 0.6 / 0.42 giây theo chế độ, so với 0.18 giây mỗi bước nhảy. Camera tăng áp lực theo quãng đường và thời gian chơi, có giới hạn tốc độ.

@@ -190,7 +190,7 @@ function endRun() {
   $('tip').textContent = advice;
   card(record ? 'KỶ LỤC MỚI!' : 'THỬ THÊM MỘT CHUYẾN?', title, `Bạn đi được ${game.score} hàng. ${advice}`, 'Đi lần nữa', 'ENTER / NÚT ĐI LẦN NỮA ĐỂ CHƠI LẠI');
 }
-const modeDescriptions = { easy: 'Nhịp chậm, khoảng trống rộng, 8 giây chuẩn bị.', normal: 'Xe nhanh từ đầu, đường rộng sớm, 5 giây chuẩn bị.', hard: 'Xe cực nhanh, cửa sổ qua đường ngắn, 3 giây chuẩn bị.' };
+const modeDescriptions = { easy: 'Nhịp chậm, khoảng trống rộng, 8 giây chuẩn bị.', normal: 'Xe nhanh từ đầu, đường rộng sớm, 5 giây chuẩn bị.', hard: 'Xe cực nhanh, cửa sổ qua đường ngắn, 3 giây chuẩn bị.', expert: 'Xe dồn dập, đường rộng sớm, chỉ 2 giây chuẩn bị.', extreme: 'Xe cực tốc, camera ép mạnh, chỉ 1.5 giây chuẩn bị.' };
 function updateMode() {
   selectedMode = $('mode').value;
   $('mode-description').textContent = modeDescriptions[selectedMode];

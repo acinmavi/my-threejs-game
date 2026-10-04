@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createGame, move, step, position, carX, trainState, difficulty } from '../src/game.js';
+import { createGame, move, step, position, carX, trainState, difficulty, DIFFICULTIES } from '../src/game.js';
 const playing = () => { const g = createGame('easy'); g.phase = 'playing'; return g; };
 test('forward hop advances one row and awards a point on landing', () => {
   const g = playing(); assert.equal(move(g, 0, 1), true);
@@ -127,14 +127,14 @@ test('normal is default and hard starts faster with earlier wide roads', () => {
   assert.ok(difficulty(48, 'hard').speedMultiplier > difficulty(48, 'normal').speedMultiplier);
 });
 test('all modes retain usable crossing gaps at maximum speed', () => {
-  for (const mode of ['easy', 'normal', 'hard']) {
+  for (const mode of Object.keys(DIFFICULTIES)) {
     const g = createGame(mode);
     for (let score = 0; score <= 288; score += 24) {
       g.score = g.row = score; g.phase = 'playing'; step(g, .001);
       for (const lane of g.lanes.values()) if (lane.type === 'road') {
         const largestCar = Math.max(...lane.cars.map(car => car.length));
         const gap = (lane.period / 2 - largestCar - .48) / lane.speed;
-        assert.ok(gap >= .8 - 1e-9, `${mode} row ${lane.row}: ${gap}`);
+        assert.ok(gap >= DIFFICULTIES[mode].gapTime - 1e-9, `${mode} row ${lane.row}: ${gap}`);
       }
     }
   }
@@ -146,4 +146,18 @@ test('hard camera starts earlier and pause freezes its clock', () => {
   const time = hard.time, camera = hard.cameraRow; hard.phase = 'ready'; step(hard, 10);
   assert.equal(hard.time, time); assert.equal(hard.cameraRow, camera);
   const replay = createGame('hard'); assert.equal(replay.mode, 'hard'); assert.equal(replay.time, 0);
+});
+
+test('all five modes increase traffic, road progression and camera pressure in order', () => {
+  const modes = Object.keys(DIFFICULTIES); assert.equal(modes.length, 5);
+  for (let i = 1; i < modes.length; i++) {
+    const before = modes[i - 1], after = modes[i];
+    assert.ok(createGame(after).lanes.get(3).speed > createGame(before).lanes.get(3).speed);
+    assert.ok(difficulty(48, after).speedMultiplier > difficulty(48, before).speedMultiplier);
+    assert.ok(DIFFICULTIES[after].widthStep < DIFFICULTIES[before].widthStep);
+    assert.ok(DIFFICULTIES[after].cameraSpeed > DIFFICULTIES[before].cameraSpeed);
+    assert.ok(DIFFICULTIES[after].grace < DIFFICULTIES[before].grace);
+    assert.deepEqual(difficulty(10000, after), difficulty(DIFFICULTIES[after].rampRows, after));
+  }
+  assert.equal(difficulty(24, 'extreme').roadWidth, 5);
 });
