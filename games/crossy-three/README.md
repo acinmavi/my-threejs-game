@@ -40,3 +40,15 @@ rtk npm run build
 Simulation runs at 120 Hz. Tests cover hop completion, scoring, interpolation, blocked moves, traffic collision, traffic wrapping and bounded lane generation.
 
 In the Sky Club collection, Escape and Home open an exit confirmation. Cancel resumes the prior play/pause state.
+
+## Độ khó
+
+Chọn Dễ / Thường / Khó trước khi bắt đầu hoặc chơi lại. Lựa chọn được lưu trên trình duyệt; lượt đang chơi không đổi độ khó. Mặc định Thường.
+
+| Chế độ | Tốc độ xe ban đầu → tối đa | Đạt tốc độ tối đa | Đường đạt 5 làn | Camera bắt đầu kéo |
+| --- | --- | --- | --- | --- |
+| Dễ | 1× → 2.5× | 240 hàng | 144 hàng | Sau 8 giây |
+| Thường | 1.6× → 3.8× | 120 hàng | 72 hàng | Sau 5 giây |
+| Khó | 2.2× → 5.5× | 96 hàng | 48 hàng | Sau 3 giây |
+
+Mỗi làn có tốc độ riêng. Khoảng trống xe có tối thiểu 3 / 1.35 / 0.8 giây theo chế độ, so với 0.18 giây mỗi bước nhảy. Camera tăng áp lực theo quãng đường và thời gian chơi, có giới hạn tốc độ.

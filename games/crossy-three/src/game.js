@@ -1,8 +1,15 @@
 export const HOP_TIME = .18;
-export function difficulty(row) {
-  const distance = Math.min(Math.max(row, 0), 240);
-  return { roadWidth: Math.min(5, 2 + Math.floor(distance / 48)),
-    speedMultiplier: 1 + distance / 240 * 1.5, level: 1 + Math.floor(distance / 48) };
+export const DIFFICULTIES = {
+  easy: { label: 'Dễ', startSpeed: 1, maxSpeed: 2.5, widthStep: 48, rampRows: 240, grace: 8, cameraSpeed: .2, cameraMax: .3, gapTime: 3 },
+  normal: { label: 'Thường', startSpeed: 1.6, maxSpeed: 3.8, widthStep: 24, rampRows: 120, grace: 5, cameraSpeed: .45, cameraMax: .75, gapTime: 1.35 },
+  hard: { label: 'Khó', startSpeed: 2.2, maxSpeed: 5.5, widthStep: 16, rampRows: 96, grace: 3, cameraSpeed: .8, cameraMax: 1.2, gapTime: .8 },
+};
+export function difficulty(row, mode = 'normal') {
+  const settings = DIFFICULTIES[mode] ?? DIFFICULTIES.normal;
+  const distance = Math.min(Math.max(row, 0), settings.rampRows);
+  return { roadWidth: Math.min(5, 2 + Math.floor(distance / settings.widthStep)),
+    speedMultiplier: settings.startSpeed + distance / settings.rampRows * (settings.maxSpeed - settings.startSpeed),
+    level: 1 + Math.floor(distance / settings.widthStep) };
 }
 export function trainState(lane, time) {
   const phase = (time + lane.trainOffset) % 12;
@@ -14,15 +21,16 @@ const seed = (row, salt = 0) => {
   const n = Math.sin(row * 127.1 + salt * 311.7) * 43758.5453;
   return n - Math.floor(n);
 };
-function laneAt(row) {
+function laneAt(row, mode) {
   const part = row % 24;
-  const level = difficulty(row);
+  const level = difficulty(row, mode);
+  const settings = DIFFICULTIES[mode];
   const roadPart = (part >= 3 && part < 3 + level.roadWidth) ||
     (part >= 19 && part < 19 + level.roadWidth) || [13, 14].includes(part) || (part === 6 && level.roadWidth === 2);
   const type = row < 3 ? 'grass' : [9, 10].includes(part) ? 'river' : part === 16 ? 'train' : roadPart ? 'road' : 'grass';
   const road = type === 'road';
   const speed = road ? (.95 + seed(part, 1) * 1.1) * level.speedMultiplier : type === 'river' ? .8 + seed(row, 3) * .45 : 0;
-  const period = road ? 26 * Math.max(1, speed / 3.4) : 26;
+  const period = road ? Math.max(26, 2 * (2.25 + .48 + speed * settings.gapTime)) : 26;
   const blocked = new Set();
   if (type === 'grass' && row > 1) {
     for (let x = -4; x <= 4; x++) if (x !== 0 && seed(row, x + 8) > .85) blocked.add(x);
@@ -42,12 +50,13 @@ function laneAt(row) {
 }
 function ensureLanes(game) {
   for (let row = Math.max(-3, game.score - 9); row <= game.score + 20; row++) {
-    if (!game.lanes.has(row)) game.lanes.set(row, laneAt(row));
+    if (!game.lanes.has(row)) game.lanes.set(row, laneAt(row, game.mode));
   }
   for (const row of game.lanes.keys()) if (row < game.score - 9) game.lanes.delete(row);
 }
-export function createGame() {
-  const game = { phase: 'ready', x: 0, row: 0, score: 0, time: 0, hop: null, lanes: new Map(), cameraRow: 0, reason: null };
+export function createGame(mode = 'normal') {
+  if (!DIFFICULTIES[mode]) mode = 'normal';
+  const game = { mode, phase: 'ready', x: 0, row: 0, score: 0, time: 0, hop: null, lanes: new Map(), cameraRow: 0, reason: null };
   ensureLanes(game); return game;
 }
 export function move(game, dx, dr) {
@@ -71,7 +80,9 @@ export function step(game, dt) {
   if (game.phase !== 'playing') return;
   game.time += dt;
   ensureLanes(game);
-  game.cameraRow = Math.max(game.score, game.cameraRow + (game.time > 8 ? (.2 + Math.min(.1, game.score * .001)) * dt : 0));
+  const settings = DIFFICULTIES[game.mode];
+  const cameraSpeed = Math.min(settings.cameraMax, settings.cameraSpeed + game.score * .003 + Math.max(0, game.time - settings.grace) * .002);
+  game.cameraRow = Math.max(game.score, game.cameraRow + (game.time > settings.grace ? cameraSpeed * dt : 0));
   if (!game.hop && game.lanes.get(game.row)?.type === 'river') {
     const lane = game.lanes.get(game.row);
     game.x += lane.direction * lane.speed * dt;

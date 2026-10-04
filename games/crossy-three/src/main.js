@@ -1,10 +1,13 @@
 import { setupGameExit } from '../../../src/exit-dialog.js';
 import * as THREE from 'three';
 import './style.css';
-import { createGame, move, step, position, carX, trainState, difficulty } from './game.js';
+import { createGame, move, step, position, carX, trainState, difficulty, DIFFICULTIES } from './game.js';
 
 const $ = id => document.getElementById(id);
-let game = createGame(), paused = false, muted = true, audio, best = 0;
+let selectedMode = 'normal';
+try { const saved = localStorage.getItem('crossy-sky-mode'); if (DIFFICULTIES[saved]) selectedMode = saved; } catch {}
+$('mode').value = selectedMode;
+let game = createGame(selectedMode), paused = false, muted = true, audio, best = 0;
 let last = 0, accumulator = 0, cameraRow = 0, facing = 0;
 try { best = Number(localStorage.getItem('crossy-sky-best')) || 0; } catch {}
 $('best').textContent = String(best).padStart(2, '0');
@@ -153,10 +156,11 @@ function tone(frequency, duration = .07) {
 function card(label, title, copy, button, hint) {
   $('card-label').textContent = label; $('card-title').textContent = title; $('card-copy').textContent = copy;
   $('play').innerHTML = `${button} <span>→</span>`; $('card-hint').textContent = hint; $('overlay').hidden = false;
+  $('difficulty-picker').hidden = game.phase === 'playing';
 }
 function start() {
   document.activeElement?.blur();
-  game = createGame(); game.phase = 'playing'; paused = false; accumulator = 0; cameraRow = 0; facing = 0;
+  game = createGame(selectedMode); game.phase = 'playing'; paused = false; accumulator = 0; cameraRow = 0; facing = 0;
   for (const view of laneMeshes.values()) scene.remove(view.group); laneMeshes.clear(); syncWorld();
   $('overlay').hidden = true; $('score').textContent = '0'; $('pause').disabled = false;
   $('pause').textContent = 'Ⅱ'; $('pause').setAttribute('aria-label', 'Tạm dừng');
@@ -186,6 +190,19 @@ function endRun() {
   $('tip').textContent = advice;
   card(record ? 'KỶ LỤC MỚI!' : 'THỬ THÊM MỘT CHUYẾN?', title, `Bạn đi được ${game.score} hàng. ${advice}`, 'Đi lần nữa', 'ENTER / NÚT ĐI LẦN NỮA ĐỂ CHƠI LẠI');
 }
+const modeDescriptions = { easy: 'Nhịp chậm, khoảng trống rộng, 8 giây chuẩn bị.', normal: 'Xe nhanh từ đầu, đường rộng sớm, 5 giây chuẩn bị.', hard: 'Xe cực nhanh, cửa sổ qua đường ngắn, 3 giây chuẩn bị.' };
+function updateMode() {
+  selectedMode = $('mode').value;
+  $('mode-description').textContent = modeDescriptions[selectedMode];
+  if (game.phase !== 'playing') {
+    game = createGame(selectedMode);
+    for (const view of laneMeshes.values()) scene.remove(view.group);
+    laneMeshes.clear(); syncWorld();
+  }
+  try { localStorage.setItem('crossy-sky-mode', selectedMode); } catch {}
+}
+$('mode').addEventListener('change', updateMode);
+updateMode();
 $('play').addEventListener('click', () => paused ? togglePause() : start());
 $('pause').addEventListener('click', togglePause);
 $('sound').addEventListener('click', () => {
@@ -195,7 +212,7 @@ $('sound').addEventListener('click', () => {
 });
 const directions = { ArrowUp:[0,1], KeyW:[0,1], ArrowDown:[0,-1], KeyS:[0,-1], ArrowLeft:[-1,0], KeyA:[-1,0], ArrowRight:[1,0], KeyD:[1,0], Space:[0,1] };
 window.addEventListener('keydown', event => {
-  if (event.target.closest('button, a, input')) return;
+  if (event.target.closest('button, a, input, select')) return;
   if (directions[event.code]) {
     event.preventDefault(); if (game.phase === 'ready') start(); else hop(...directions[event.code]);
   }
@@ -243,12 +260,12 @@ renderer.setAnimationLoop(time => {
   wings.forEach((wing, i) => { wing.rotation.z = game.hop ? Math.sin(p.height * 4) * (i ? -.5 : .5) : 0; });
   marker.position.set(p.x, onRiver ? .15 : .025, -p.row); marker.visible = game.phase !== 'over';
   deadline.position.z = -(game.cameraRow - 3.5);
-  deadline.visible = game.phase === 'playing' && game.time > 8;
+  deadline.visible = game.phase === 'playing' && game.time > DIFFICULTIES[game.mode].grace;
   if (!paused) cameraRow += (game.cameraRow - cameraRow) * (1 - Math.exp(-dt * 6));
   const lag = game.cameraRow - p.row;
-  const level = difficulty(game.score);
-  $('difficulty').textContent = `CẤP ${level.level} · ĐƯỜNG ${level.roadWidth} LÀN · XE ${level.speedMultiplier.toFixed(2)}×`;
-  $('pressure').textContent = game.time < 8 ? `CHUẨN BỊ: ${Math.ceil(8 - game.time)} GIÂY` : lag > 2.2 ? '⚠ TIẾN LÊN — SẮP BỊ BỎ LẠI' : '↑ CAMERA ĐANG KÉO';
+  const level = difficulty(game.score, game.mode);
+  $('difficulty').textContent = `${DIFFICULTIES[game.mode].label.toUpperCase()} · CẤP ${level.level} · ĐƯỜNG ${level.roadWidth} LÀN · XE ${level.speedMultiplier.toFixed(2)}×`;
+  $('pressure').textContent = game.time < DIFFICULTIES[game.mode].grace ? `CHUẨN BỊ: ${Math.ceil(DIFFICULTIES[game.mode].grace - game.time)} GIÂY` : lag > 2.2 ? '⚠ TIẾN LÊN — SẮP BỊ BỎ LẠI' : '↑ CAMERA ĐANG KÉO';
   $('pressure').classList.toggle('urgent', lag > 2.2);
   if (game.phase === 'playing' && !paused) {
     const nearbyTrain = [...game.lanes.values()].find(lane => lane.type === 'train' && lane.row >= p.row && lane.row - p.row < 4 && (trainState(lane, game.time).warning || trainState(lane, game.time).active));
