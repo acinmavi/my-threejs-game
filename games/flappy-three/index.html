@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="vi">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#101c30"><title>Flappy 3D · Sky Club</title></head>
+<body>
+  <main class="shell">
+    <header><a class="brand" href="./"><span class="brand-icon">✦</span> SKY CLUB <span class="edition">ARCADE / 001</span></a><button id="sound" aria-label="Bật âm thanh" aria-pressed="false">♪ <span>Âm thanh: tắt</span></button></header>
+    <section class="intro"><div><div class="eyebrow"><span></span> MỘT CHÚ CHIM. MỘT BẦU TRỜI.</div><h1>Flappy<span>3D</span><i>↗</i></h1><p>Đập cánh. Lách qua ống. Bay xa hơn lần trước.</p></div><div class="record"><span>KỶ LỤC CỦA BẠN</span><strong id="best">00</strong><small>Mỗi lần bay, thêm một cơ hội.</small></div></section>
+    <section class="game-frame" aria-label="Game Flappy Bird 3D">
+      <div id="world"></div><div class="hud"><span class="pill"><span class="live-dot"></span> SKY MEADOW · <span id="pace">1.00×</span></span><div class="score"><span>ĐIỂM</span><strong id="score">0</strong></div><button id="pause" aria-label="Tạm dừng" disabled>Ⅱ</button></div>
+      <div id="overlay"><div class="flight-icon">↗</div><span id="card-label">SẴN SÀNG CẤT CÁNH?</span><h2 id="card-title">Chạm để bay.</h2><p id="card-copy">Giữ nhịp đập cánh và tìm đường qua các ống.</p><button id="play">Bắt đầu bay <span>→</span></button><small id="card-hint">SPACE / CLICK / CHẠM MÀN HÌNH</small></div>
+      <div class="scene-caption">A LITTLE FLIGHT, A LITTLE JOY.</div><div id="flash"></div>
+    </section>
+    <footer><div><kbd>SPACE</kbd><span>hoặc click / chạm để đập cánh</span><kbd>P</kbd><span>tạm dừng</span></div><span class="made">DỰNG BẰNG THREE.JS <span>✦</span> BAY BẰNG BẠN</span></footer>
+  </main><script type="module" src="./src/main.js"></script>
+</body></html>

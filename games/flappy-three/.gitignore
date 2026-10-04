@@ -1,5 +1,3 @@
 node_modules/
 dist/
-.vercel/
-.archive/
 .DS_Store
