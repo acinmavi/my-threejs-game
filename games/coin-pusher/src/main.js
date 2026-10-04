@@ -252,7 +252,8 @@ $("fire").addEventListener("click", () => {
   $("fire").blur();
 });
 window.addEventListener("keydown", (event) => {
-  if (event.target.closest("button,a,input,select")) return;
+  if (event.target.closest("button,a,select")) return;
+  if (event.target.closest("input") && !["Space", "KeyP"].includes(event.code)) return;
   if (
     ["ArrowLeft", "ArrowRight", "KeyA", "KeyD", "Space"].includes(event.code)
   ) {
