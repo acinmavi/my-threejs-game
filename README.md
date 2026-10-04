@@ -28,3 +28,5 @@ rtk npm run preview
 The root Vite build produces all three pages and shares the Three.js bundle between games. Deploy `dist/` as a static site, or deploy this repository using the included Vercel configuration. No server or database is required.
 
 The original standalone checkouts were moved from `Documents/Working` to `.archive/` as local recovery copies; `.archive/` is ignored by Git and excluded from deployment. Active source is under `games/`.
+
+Pop the Lock: `/games/pop-the-lock/` — bấm đúng nhịp, đổi chiều sau mỗi lần trúng, mở khóa theo màn; Space/click/chạm, P pause, Esc về Home.

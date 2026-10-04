@@ -1,12 +1,14 @@
 import './home.css';
 import flappyPreview from '../games/flappy-three/preview.jpg';
 import crossyPreview from '../games/crossy-three/preview.jpg';
+import lockPreview from '../games/pop-the-lock/preview.svg';
 
 const games = [
   { title:'Flappy 3D', number:'001', tag:'GIỮ NHỊP · BAY XA', image:flappyPreview,
     href:'/games/flappy-three/', key:'sky-club-best', description:'Một chú chim. Một bầu trời. Đập cánh qua những chiếc ống và tìm nhịp bay của bạn.', controls:'SPACE / CLICK / CHẠM', theme:'sky' },
   { title:'Crossy 3D', number:'002', tag:'NHÌN HAI BÊN · TIẾN LÊN', image:crossyPreview,
     href:'/games/crossy-three/', key:'crossy-sky-best', description:'Né xe, nhảy lên gỗ và đợi tàu qua. Mỗi bước tiến là một cuộc phiêu lưu mới.', controls:'WASD / MŨI TÊN / VUỐT', theme:'meadow' },
+  { title:'Pop the Lock', number:'003', tag:'ĐÚNG NHỊP · MỞ KHÓA', image:lockPreview, href:'/games/pop-the-lock/', key:'pop-lock-best', description:'Bắt đúng khoảnh khắc để mở khóa. Mỗi màn nhanh hơn, mỗi lần trúng lại đổi chiều.', controls:'SPACE / CLICK / CHẠM', theme:'lock' },
 ];
 document.getElementById('games').innerHTML = games.map(game => {
   let best = 0;
