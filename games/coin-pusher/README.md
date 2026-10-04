@@ -1,11 +1,17 @@
 # Infinity Pusher
 
-3D coin pusher inspired by the moving target and six-stone collection mechanics of Andamiro Avengers. Original geometric cabinet/art. No real currency.
+Three.js / Cannon ES two-tier coin pusher inspired by Andamiro Avengers. Original geometric art; virtual credits and points.
 
-Start with 50 tokens. Aim with slider / left-right / A-D; press Space / fire button. Each shot costs one token and creates a physical disc. Time the six colored target lights crossing the gold marker for +2 tokens. The pusher advances and retracts every 3.8 seconds. Cannon ES simulates gravity, collisions, friction and stacked discs; stones use spherical collision shapes with faceted Three.js visuals.
+## Core loop
 
-Front coins: +1 point and +1 token. Side gutters lose pieces; lost stones recycle onto the board. Every front stone, regardless of color: +20 points and Bonus Spin awarding 4, 6, 8 or 12 tokens. Every sixth stone: +100 points and +30 tokens. Bonus rewards use RNG; physical collection does not. No tokens left: allow 8 seconds for last shot/2 pusher strokes and pending bonus rewards before game over. P pauses physics and clocks; Esc confirms Home. Best score stored locally as coin-pusher-best.
+50 starting credits. Press Space / fire button to spend one credit and fire one visible token at the rotating target wheel. The wheel has sectors 1, 3, 5, 10, 2, 8, 15 and 5. The sector at the fixed marker when the projectile arrives (0.6 seconds) awards that exact number of additional physical tokens. The fired token falls onto the shelf too. Reward tokens rain onto the upper moving shelf; the wheel does not directly add the displayed award to the credit wallet. Slider / A D / arrows choose the drop lane.
 
-Fixed 60 Hz physics, SAP broadphase, sleeping bodies, 260-piece cap and instanced coin rendering. This is a simplified cabinet prototype; real machines' coin friction and payout calibration differ.
+The upper shelf advances and retracts on a 3.8-second cycle above a fixed lower floor. Coins are present on both tiers at the start. The sliding upper shelf lets tokens fall onto the lower tier as its front edge retracts. Its front face and falling tokens push the dense lower pile toward the collection ledge. Side gutters lose objects.
 
-Starting board uses a dense 132-coin lower layer and 25–55 random extra coins. Every round changes pile positions and count. All resting bodies wake during forward strokes so forces propagate to the ledge. Collected stones recycle; duplicate colors count toward each six-stone Super Bonus.
+Starting board: 236–281 randomized coins (50% more than the previous 157–187), including a prefilled upper shelf, plus nine random-color stones (previously six). Every front coin awards +1 point and +1 credit. Every 20 front coins releases one random-color stone onto the upper shelf; side losses and upper-to-lower transfers do not count toward this milestone. Collected or side-lost stones do not auto-respawn.
+
+Every front stone counts regardless of color: +20 points and Bonus Spin awarding 4, 6, 8 or 12 credits. Every sixth stone additionally awards Super Bonus / Jackpot: +100 points and +30 credits. Duplicate colors and subsequent sets of six work identically.
+
+P pauses physics, flights, dispensing and bonus timers. Esc confirms Home; cancel preserves pause state. When credits run out, finish pending flights, reward rain, stones and bonus spins, then allow eight seconds for physical settling before ending. Best score remains browser-local.
+
+Fixed 60 Hz rigid-body physics, SAP broadphase, sleeping bodies, reduced contact friction equations, 420-piece cap and instanced coin rendering. Exact queued payouts wait for capacity rather than disappearing. Shelf friction is calibrated for visible two-tier transfer in this simplified browser model; no cloth/card simulation.

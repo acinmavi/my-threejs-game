@@ -7,3 +7,7 @@
 5. Commit, push main, deploy to existing Vercel project and verify public route. Notify completion.
 
 Additional regression checks: dense random starting count, full-pile contact propagation, repeated same-color stones and repeated six-stone bonuses.
+
+## Two-tier refinement
+
+Replace target-hit +2-wallet mechanic with numbered physical payout wheel and token flight. Build sliding upper shelf and fixed lower floor, calibrated shelf contact friction and contact reduction. Seed 50% more board coins and stones. Generate random stones after each 20 front coins, preserving any-six collection bonuses. Update UI, docs, tests, Home copy; run full suite/build, browser desktop/mobile and public route/exit before commit and deploy.

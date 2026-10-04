@@ -12,7 +12,7 @@ const games = [
     href:'/games/crossy-three/', key:'crossy-sky-best', description:'Né xe, nhảy lên gỗ và đợi tàu qua. Mỗi bước tiến là một cuộc phiêu lưu mới.', controls:'WASD / MŨI TÊN / VUỐT', theme:'meadow' },
   { title:'Pop the Lock', number:'003', tag:'ĐÚNG NHỊP · MỞ KHÓA', image:lockPreview, href:'/games/pop-the-lock/', key:'pop-lock-endless-best', description:'Bắt đúng nhịp, trúng đổi chiều. Endless chơi liên tục, kim tăng tốc theo thời gian.', controls:'SPACE / CLICK / CHẠM', theme:'lock' },
   { title:'Claw Club', number:'004', tag:'CĂN THẬT KỸ · GẮP THẬT CHẮC', image:clawPreview, href:'/games/claw-machine/', key:'claw-club-best', description:'Máy gắp gấu 3D. Ba lượt mỗi ván, càng yếu và gấu dễ tuột — căn thật kỹ trước khi gắp.', controls:'WASD / MŨI TÊN / CHẠM', theme:'claw' },
-  { title:'Infinity Pusher', number:'005', tag:'CĂN NHỊP · ĐẨY XU · SĂN ĐÁ', image:coinPreview, href:'/games/coin-pusher/', key:'coin-pusher-best', description:'50 xu khởi đầu. Căn nhịp vòng mục tiêu, đẩy xu và thu sáu viên đá bất kỳ để mở Super Bonus.', controls:'SPACE / A D / THANH TRƯỢT / CHẠM', theme:'pusher' },
+  { title:'Infinity Pusher', number:'005', tag:'CĂN NHỊP · ĐẨY XU · SĂN ĐÁ', image:coinPreview, href:'/games/coin-pusher/', key:'coin-pusher-best', description:'Bắn token qua vòng quay, nhận đến 15 xu đổ lên bàn đẩy hai tầng. Đẩy đá xuống mép để mở Bonus Spin và Jackpot.', controls:'SPACE / A D / THANH TRƯỢT / CHẠM', theme:'pusher' },
 ];
 document.getElementById('games').innerHTML = games.map(game => {
   let best = 0;

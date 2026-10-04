@@ -7,7 +7,8 @@ import {
   setAim,
   COLORS,
   MAX_PIECES,
-  targetHit,
+  WHEEL_VALUES,
+  wheelAward,
 } from "./game.js";
 import { setupGameExit } from "../../../src/exit-dialog.js";
 const $ = (id) => document.getElementById(id);
@@ -81,38 +82,77 @@ box("#456b63", [5.9, 2.9, 0.24], [0, 1.25, -2.9]);
 box("#d3b270", [5.9, 0.15, 0.3], [0, 2.74, -2.9]);
 for (const x of [-2.92, 2.92])
   box("#73978a", [0.15, 3.5, 0.15], [x, 1.15, -2.8]);
-const pusher = box("#b4c9bb", [4.6, 0.6, 1.1], [0, 0.3, -2.35]);
-box("#dfb965", [4.6, 0.06, 0.05], [0, 0.6, -1.79]);
+const pusher = box("#b4c9bb", [4.6, 0.6, 1.7], [0, 0.3, -1.85]);
+box("#dfb965", [4.6, 0.06, 0.05], [0, 0.6, -0.98]);
 const pusherTrim = scene.children[scene.children.length - 1];
 const wheel = new THREE.Group();
 wheel.position.set(0, 1.65, -2.7);
 scene.add(wheel);
-const wheelBack = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.87, 0.87, 0.08, 48),
-  mat("#254840"),
+wheel.add(
+  new THREE.Mesh(new THREE.RingGeometry(0.27, 0.89, 64), mat("#254840")),
 );
-wheelBack.rotation.x = Math.PI / 2;
-wheel.add(wheelBack);
 wheel.add(
   new THREE.Mesh(
-    new THREE.TorusGeometry(0.86, 0.04, 8, 48),
+    new THREE.TorusGeometry(0.9, 0.035, 8, 64),
     mat("#d4b46f", true),
   ),
 );
 const rotor = new THREE.Group();
-rotor.position.z = 0.08;
+rotor.position.z = 0.04;
 wheel.add(rotor);
-for (let i = 0; i < 6; i++) {
-  const angle = (i * Math.PI * 2) / 6;
-  const dot = new THREE.Mesh(new THREE.OctahedronGeometry(0.1), mat(COLORS[i]));
-  dot.position.set(Math.sin(angle) * 0.68, Math.cos(angle) * 0.68, 0);
-  rotor.add(dot);
+for (let i = 0; i < WHEEL_VALUES.length; i++) {
+  const sector = (Math.PI * 2) / WHEEL_VALUES.length,
+    centerAngle = i * sector;
+  const shape = new THREE.Shape();
+  for (let j = 0; j <= 12; j++) {
+    const a = centerAngle - sector / 2 + (j * sector) / 12;
+    if (j === 0) shape.moveTo(Math.sin(a) * 0.86, Math.cos(a) * 0.86);
+    else shape.lineTo(Math.sin(a) * 0.86, Math.cos(a) * 0.86);
+  }
+  for (let j = 12; j >= 0; j--) {
+    const a = centerAngle - sector / 2 + (j * sector) / 12;
+    shape.lineTo(Math.sin(a) * 0.29, Math.cos(a) * 0.29);
+  }
+  shape.closePath();
+  const wedge = new THREE.Mesh(
+    new THREE.ShapeGeometry(shape),
+    new THREE.MeshBasicMaterial({
+      color: WHEEL_VALUES[i] === 15 ? "#c09043" : i % 2 ? "#436d60" : "#315547",
+      side: THREE.DoubleSide,
+    }),
+  );
+  rotor.add(wedge);
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 128;
+  const context = canvas.getContext("2d");
+  context.fillStyle = "#fff2c5";
+  context.font = "bold 70px sans-serif";
+  context.textAlign = "center";
+  context.fillText(String(WHEEL_VALUES[i]), 64, 74);
+  context.font = "22px sans-serif";
+  context.fillText("XU", 64, 104);
+  const label = new THREE.Sprite(
+    new THREE.SpriteMaterial({
+      map: new THREE.CanvasTexture(canvas),
+      depthTest: false,
+    }),
+  );
+  label.position.set(
+    Math.sin(centerAngle) * 0.61,
+    Math.cos(centerAngle) * 0.61,
+    0.015,
+  );
+  label.scale.set(0.35, 0.35, 1);
+  rotor.add(label);
 }
-const center = new THREE.Mesh(
-  new THREE.IcosahedronGeometry(0.24),
-  mat("#e9bf61", true),
+const throat = new THREE.Mesh(
+  new THREE.CircleGeometry(0.27, 32),
+  new THREE.MeshBasicMaterial({ color: "#172f2b" }),
 );
-wheel.add(center);
+throat.position.z = 0.02;
+wheel.add(throat);
+const flightViews = new Map();
 const pointer = new THREE.Mesh(
   new THREE.ConeGeometry(0.13, 0.25, 3),
   mat("#ffe09a"),
@@ -143,7 +183,7 @@ const aimLine = new THREE.Mesh(
 aimLine.rotation.x = -Math.PI / 2;
 aimLine.position.set(0, 0.045, -0.25);
 scene.add(aimLine);
-const coinGeometry = new THREE.CylinderGeometry(0.19, 0.19, 0.075, 16);
+const coinGeometry = new THREE.CylinderGeometry(0.2, 0.2, 0.075, 16);
 const coins = new THREE.InstancedMesh(
   coinGeometry,
   mat("#dbb152", true),
@@ -216,7 +256,7 @@ function togglePause() {
   document.activeElement?.blur();
 }
 function fire() {
-  if (!paused && shoot(game)) tone(targetHit(game.wheel) ? 760 : 320);
+  if (!paused && shoot(game)) tone(320);
 }
 function finish() {
   best = Math.max(best, game.score);
@@ -227,9 +267,9 @@ function finish() {
   $("pause").disabled = true;
   clearInput();
   card(
-    "HẾT XU",
+    "HẾT CREDIT",
     "Một ván thật đã.",
-    `${game.score} điểm · ${game.collected} đá · ${game.shots} xu đã bắn. Căn đèn mục tiêu và tránh khe hai bên để chơi lâu hơn.`,
+    `${game.score} điểm · ${game.collected} đá · ${game.shots} xu đã bắn. Căn ô thưởng trên vòng quay và tránh khe hai bên để chơi lâu hơn.`,
     "Chơi ván mới →",
   );
   tone(180);
@@ -253,7 +293,8 @@ $("fire").addEventListener("click", () => {
 });
 window.addEventListener("keydown", (event) => {
   if (event.target.closest("button,a,select")) return;
-  if (event.target.closest("input") && !["Space", "KeyP"].includes(event.code)) return;
+  if (event.target.closest("input") && !["Space", "KeyP"].includes(event.code))
+    return;
   if (
     ["ArrowLeft", "ArrowRight", "KeyA", "KeyD", "Space"].includes(event.code)
   ) {
@@ -308,10 +349,33 @@ function frame(now) {
     if (game.phase === "over") finish();
   }
   pusher.position.z = game.pusher.position.z;
-  pusherTrim.position.z = pusher.position.z + 0.56;
-  rotor.rotation.z = -game.wheel;
-  center.rotation.z = game.spin ? game.time * 12 : game.wheel * 0.25;
-  targetLamp.material.emissiveIntensity = targetHit(game.wheel) ? 2.5 : 0.2;
+  pusherTrim.position.z = pusher.position.z + 0.87;
+  rotor.rotation.z = game.wheel;
+  targetLamp.material.emissiveIntensity =
+    wheelAward(game.wheel) === 15 ? 2.5 : 0.4;
+  const liveFlights = new Set();
+  for (const flight of game.flights) {
+    liveFlights.add(flight.id);
+    if (!flightViews.has(flight.id)) {
+      const mesh = new THREE.Mesh(coinGeometry, mat("#ffe294", true));
+      mesh.scale.setScalar(1.2);
+      scene.add(mesh);
+      flightViews.set(flight.id, mesh);
+    }
+    const mesh = flightViews.get(flight.id),
+      t = Math.min(flight.age / 0.6, 1);
+    mesh.position.set(
+      flight.aim * (1 - t),
+      1.52 + (1.65 - 1.52) * t + Math.sin(t * Math.PI) * 0.6,
+      -1.3 - 1.35 * t,
+    );
+    mesh.rotation.set(Math.PI / 2, t * 8, 0);
+  }
+  for (const [id, mesh] of flightViews)
+    if (!liveFlights.has(id)) {
+      scene.remove(mesh);
+      flightViews.delete(id);
+    }
   launcher.position.x = game.aim;
   aimLine.position.x = game.aim;
   let count = 0;
@@ -344,7 +408,7 @@ function frame(now) {
   }
   coins.count = count;
   coins.instanceMatrix.needsUpdate = true;
-  $("tokens").textContent = `${game.tokens} XU`;
+  $("tokens").textContent = `${game.tokens} CREDIT`;
   $("score").textContent = `${game.score} ĐIỂM`;
   $("stone-label").textContent =
     `ĐÁ ${game.collected} · BỘ ${game.collected % 6}/6`;
@@ -356,18 +420,20 @@ function frame(now) {
     );
   }
   $("bonus").textContent = game.spin
-    ? "BONUS SPIN ĐANG QUAY…"
-    : game.collected > 0 && game.collected % 6 === 0
-      ? "SUPER BONUS ĐÃ NHẬN"
-      : game.lastBonus
-        ? `BONUS GẦN NHẤT +${game.lastBonus} XU`
-        : "ĐỦ 6 ĐÁ → SUPER BONUS";
-  $("wheel-status").textContent =
-    game.tokens === 0
-      ? `CHỜ XU RƠI ${Math.max(0, Math.ceil(8 - game.grace))}s`
-      : targetHit(game.wheel)
-        ? "BẮN NGAY! +2 XU"
-        : "ĐÈN MỤC TIÊU +2 XU";
+    ? game.spin.reward === 30
+      ? "SUPER BONUS · JACKPOT 🎡"
+      : `BONUS SPIN 🎡 · ${[4, 6, 8, 12][Math.floor(game.time * 10) % 4]} CREDIT`
+    : game.lastBonus
+      ? `BONUS GẦN NHẤT +${game.lastBonus} CREDIT`
+      : "6 ĐÁ BẤT KỲ → JACKPOT";
+  $("wheel-status").textContent = game.flights.length
+    ? "TOKEN → VÒNG QUAY"
+    : game.pendingCoins
+      ? `ĐANG THẢ ${game.pendingCoins} XU`
+      : game.lastWheel
+        ? `Ô VỪA TRÚNG: ${game.lastWheel} XU`
+        : `Ô ĐANG QUA: ${wheelAward(game.wheel)} XU`;
+  $("stone-progress").textContent = `${game.frontCoins % 20}/20 XU → ĐÁ MỚI`;
   $("tip").textContent = game.message;
   $("aim-value").textContent =
     Math.abs(game.aim) < 0.15
@@ -376,7 +442,10 @@ function frame(now) {
   const inactive = paused || game.phase !== "playing";
   $("aim").disabled = inactive;
   $("fire").disabled =
-    inactive || game.tokens <= 0 || game.pieces.length >= MAX_PIECES;
+    inactive ||
+    game.tokens <= 0 ||
+    game.pieces.length >= MAX_PIECES ||
+    game.pendingCoins > 60;
   if (game.pieces.length >= MAX_PIECES)
     $("tip").textContent =
       "Bàn xu đang đầy. Chờ bàn đẩy dồn xu xuống rồi bắn tiếp.";

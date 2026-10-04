@@ -205,3 +205,26 @@ footer {
     font-size: 8px;
   }
 }
+
+.hud {
+  right: auto;
+  max-width: calc(100% - 50px);
+}
+#stone-progress {
+  display: block;
+  margin: 5px 0 8px;
+  font-size: 7px;
+  color: #6a7f70;
+}
+@media (max-width: 700px) {
+  .hud {
+    right: 12px;
+    max-width: none;
+  }
+  .hud #tokens {
+    font-size: 11px;
+  }
+  #stone-progress {
+    font-size: 6px;
+  }
+}

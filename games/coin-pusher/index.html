@@ -28,23 +28,25 @@
       <section class="game-frame" aria-label="Máy đẩy xu 3D">
         <div id="world"></div>
         <div class="hud">
-          <span id="tokens">50 XU</span><span id="score">0 ĐIỂM</span
-          ><span id="wheel-status">ĐÈN MỤC TIÊU +2 XU</span
+          <span id="tokens">50 CREDIT</span><span id="score">0 ĐIỂM</span
+          ><span id="wheel-status">TARGET WHEEL · 1–15 XU</span
           ><button id="pause" aria-label="Tạm dừng" disabled>Ⅱ</button>
         </div>
         <div class="stones" aria-label="Đá đã thu thập">
           <span id="stone-label">ĐÁ 0 · BỘ 0/6</span>
           <div id="stone-list"></div>
+          <span id="stone-progress">0/20 XU → ĐÁ MỚI</span>
           <b id="bonus">6 ĐÁ BẤT KỲ → SUPER BONUS</b>
         </div>
         <div id="overlay">
-          <span id="card-label">50 XU · ĐÁ NÀO CŨNG TÍNH</span>
+          <span id="card-label">50 CREDIT · ĐÁ NÀO CŨNG TÍNH</span>
           <h2 id="card-title">Một cú đẩy nữa.</h2>
           <p id="card-copy">
-            Chọn vị trí bắn bằng thanh trượt hoặc ← → / A D. Bấm Space / BẮN XU
-            khi đèn trên vòng trùng mũi tên vàng để nhận +2 xu. Xu rơi cửa trước
-            cho điểm và xu mới; rơi khe bên bị mất. Mỗi đá mở Bonus Spin, đủ sáu
-            đá nhận Super Bonus.
+            Mỗi lần bấm dùng 1 credit để bắn token qua vòng quay. Trúng ô 15 thì
+            thêm 15 xu rơi lên bàn đẩy trên. Xu trên bàn co/duỗi rơi xuống bàn
+            dưới, dồn xu và đá ra mép. Cứ 20 xu cửa trước, máy thả thêm 1 đá
+            ngẫu nhiên. Mỗi đá mở Bonus Spin; 6 đá bất kỳ mở Super Bonus /
+            Jackpot.
           </p>
           <button id="play">Bắt đầu ván →</button>
         </div>
@@ -65,11 +67,12 @@
             disabled
           /><small>← → / A D · TRÁI — GIỮA — PHẢI</small></label
         ><button id="fire" disabled>
-          BẮN XU <small>SPACE · 1 XU / LẦN</small>
+          BẮN XU <small>SPACE · 1 CREDIT / LẦN</small>
         </button>
       </div>
       <footer>
-        <span>Xu cửa trước: +1 điểm +1 xu · Đá: +20 điểm và Bonus Spin</span
+        <span
+          >20 xu cửa trước → 1 đá · Đá rơi → Bonus Spin · 6 đá → Jackpot</span
         ><span>P tạm dừng · Esc về Home</span>
       </footer>
     </main>
