@@ -9,6 +9,8 @@ import {
   MAX_PIECES,
   WHEEL_VALUES,
   wheelAward,
+  BONUS_REWARDS,
+  bonusLabel,
 } from "./game.js";
 import { setupGameExit } from "../../../src/exit-dialog.js";
 const $ = (id) => document.getElementById(id);
@@ -67,12 +69,24 @@ function box(color, size, pos) {
   return mesh;
 }
 box("#527f73", [6.15, 0.9, 6.8], [0, -0.85, 0.3]);
-box("#d8c991", [4.9, 0.25, 5.1], [0, -0.13, 0]);
-// Dark gutters stay visually open along both sides and the front ledge.
-for (const x of [-2.7, 2.7]) {
-  box("#294d48", [0.48, 0.15, 5.8], [x, -0.22, 0.05]);
-  box("#729489", [0.15, 0.55, 6.3], [x * 1.1, 0.01, 0.1]);
-  box("#d4b474", [0.07, 0.05, 6.3], [x * 1.1, 0.3, 0.1]);
+box("#d8c991", [4.9, 0.25, 6.2], [0, -0.13, -0.55]);
+// Closed side walls meet the floor; only the front collection ledge stays open.
+const sideGlass = new THREE.MeshPhysicalMaterial({
+  color: "#d8ebe3",
+  transparent: true,
+  opacity: 0.15,
+  depthWrite: false,
+  side: THREE.DoubleSide,
+});
+for (const x of [-2.55, 2.55]) {
+  box("#729489", [0.2, 0.35, 6.25], [x, 0.1, -0.575]);
+  box("#d4b474", [0.21, 0.06, 6.25], [x, 0.28, -0.575]);
+  const panel = new THREE.Mesh(
+    new THREE.BoxGeometry(0.04, 1.95, 6.25),
+    sideGlass,
+  );
+  panel.position.set(x, 1.3, -0.575);
+  scene.add(panel);
 }
 box("#244c47", [4.9, 0.12, 0.75], [0, -0.3, 2.92]);
 box("#e4bf72", [4.9, 0.06, 0.06], [0, -0.01, 2.52]);
@@ -82,11 +96,11 @@ box("#456b63", [5.9, 2.9, 0.24], [0, 1.25, -2.9]);
 box("#d3b270", [5.9, 0.15, 0.3], [0, 2.74, -2.9]);
 for (const x of [-2.92, 2.92])
   box("#73978a", [0.15, 3.5, 0.15], [x, 1.15, -2.8]);
-const pusher = box("#b4c9bb", [4.6, 0.6, 1.7], [0, 0.3, -1.85]);
-box("#dfb965", [4.6, 0.06, 0.05], [0, 0.6, -0.98]);
+const pusher = box("#b4c9bb", [4.9, 0.6, 2.6], [0, 0.3, -2.3]);
+box("#dfb965", [4.9, 0.06, 0.05], [0, 0.6, -0.98]);
 const pusherTrim = scene.children[scene.children.length - 1];
 const wheel = new THREE.Group();
-wheel.position.set(0, 1.65, -2.7);
+wheel.position.set(-1.05, 1.65, -2.7);
 scene.add(wheel);
 wheel.add(
   new THREE.Mesh(new THREE.RingGeometry(0.27, 0.89, 64), mat("#254840")),
@@ -152,13 +166,76 @@ const throat = new THREE.Mesh(
 );
 throat.position.z = 0.02;
 wheel.add(throat);
+// A separate stone reward wheel: its pointer and payouts never affect credits.
+const bonusWheel = new THREE.Group();
+bonusWheel.position.set(1.25, 1.65, -2.65);
+bonusWheel.scale.setScalar(0.85);
+scene.add(bonusWheel);
+bonusWheel.add(
+  new THREE.Mesh(
+    new THREE.TorusGeometry(0.9, 0.04, 8, 64),
+    mat("#d4b46f", true),
+  ),
+);
+const bonusRotor = new THREE.Group();
+bonusWheel.add(bonusRotor);
+for (let i = 0; i < BONUS_REWARDS.length; i++) {
+  const sector = (Math.PI * 2) / BONUS_REWARDS.length;
+  const angle = i * sector;
+  const shape = new THREE.Shape();
+  shape.moveTo(0, 0);
+  for (let j = 0; j <= 16; j++) {
+    const a = angle - sector / 2 + (j * sector) / 16;
+    shape.lineTo(Math.sin(a) * 0.86, Math.cos(a) * 0.86);
+  }
+  shape.closePath();
+  bonusRotor.add(
+    new THREE.Mesh(
+      new THREE.ShapeGeometry(shape),
+      new THREE.MeshBasicMaterial({
+        color: i % 2 ? "#654e79" : "#846695",
+        side: THREE.DoubleSide,
+      }),
+    ),
+  );
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#fff2c5";
+  ctx.textAlign = "center";
+  ctx.font = "bold 58px sans-serif";
+  ctx.fillText(String(BONUS_REWARDS[i].amount), 64, 65);
+  ctx.font = "bold 24px sans-serif";
+  ctx.fillText(
+    bonusLabel(BONUS_REWARDS[i]).split(" ").slice(1).join(" "),
+    64,
+    100,
+  );
+  const label = new THREE.Sprite(
+    new THREE.SpriteMaterial({
+      map: new THREE.CanvasTexture(canvas),
+      depthTest: false,
+    }),
+  );
+  label.position.set(Math.sin(angle) * 0.6, Math.cos(angle) * 0.6, 0.02);
+  label.scale.set(0.37, 0.37, 1);
+  bonusRotor.add(label);
+}
+const bonusPointer = new THREE.Mesh(
+  new THREE.ConeGeometry(0.13, 0.25, 3),
+  mat("#ffe09a"),
+);
+bonusPointer.rotation.z = Math.PI;
+bonusPointer.position.set(1.25, 2.5, -2.5);
+scene.add(bonusPointer);
 const flightViews = new Map();
 const pointer = new THREE.Mesh(
   new THREE.ConeGeometry(0.13, 0.25, 3),
   mat("#ffe09a"),
 );
 pointer.rotation.z = Math.PI;
-pointer.position.set(0, 2.65, -2.56);
+pointer.position.set(-1.05, 2.65, -2.56);
 scene.add(pointer);
 const targetLamp = new THREE.Mesh(
   new THREE.SphereGeometry(0.065, 12, 8),
@@ -168,7 +245,7 @@ const targetLamp = new THREE.Mesh(
     emissiveIntensity: 0.5,
   }),
 );
-targetLamp.position.set(0, 2.32, -2.56);
+targetLamp.position.set(-1.05, 2.32, -2.56);
 scene.add(targetLamp);
 const launcher = box("#d4b578", [0.32, 0.25, 0.55], [0, 1.52, -1.3]);
 const aimLine = new THREE.Mesh(
@@ -349,8 +426,9 @@ function frame(now) {
     if (game.phase === "over") finish();
   }
   pusher.position.z = game.pusher.position.z;
-  pusherTrim.position.z = pusher.position.z + 0.87;
+  pusherTrim.position.z = pusher.position.z + 1.32;
   rotor.rotation.z = game.wheel;
+  bonusRotor.rotation.z = game.bonusWheel;
   targetLamp.material.emissiveIntensity =
     wheelAward(game.wheel) === 15 ? 2.5 : 0.4;
   const liveFlights = new Set();
@@ -365,7 +443,7 @@ function frame(now) {
     const mesh = flightViews.get(flight.id),
       t = Math.min(flight.age / 0.6, 1);
     mesh.position.set(
-      flight.aim * (1 - t),
+      flight.aim * (1 - t) - 1.05 * t,
       1.52 + (1.65 - 1.52) * t + Math.sin(t * Math.PI) * 0.6,
       -1.3 - 1.35 * t,
     );
@@ -420,12 +498,10 @@ function frame(now) {
     );
   }
   $("bonus").textContent = game.spin
-    ? game.spin.reward === 30
-      ? "SUPER BONUS · JACKPOT 🎡"
-      : `BONUS SPIN 🎡 · ${[4, 6, 8, 12][Math.floor(game.time * 10) % 4]} CREDIT`
+    ? `${game.spin.reward.superBonus ? "SUPER BONUS ×3" : "ĐÁ → BONUS SPIN"} 🎡 · ĐANG QUAY`
     : game.lastBonus
-      ? `BONUS GẦN NHẤT +${game.lastBonus} CREDIT`
-      : "6 ĐÁ BẤT KỲ → JACKPOT";
+      ? `${game.lastBonus.superBonus ? "JACKPOT ×3" : "BONUS"}: +${bonusLabel(game.lastBonus)}`
+      : "VÒNG ĐÁ: XU / ĐÁ / ĐIỂM · 6 ĐÁ → ×3";
   $("wheel-status").textContent = game.flights.length
     ? "TOKEN → VÒNG QUAY"
     : game.pendingCoins

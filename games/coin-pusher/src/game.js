@@ -8,6 +8,19 @@ export const COLORS = [
   "#e7854d",
 ];
 export const WHEEL_VALUES = [1, 3, 5, 10, 2, 8, 15, 5];
+export const BONUS_REWARDS = [
+  { kind: "coins", amount: 8 },
+  { kind: "points", amount: 50 },
+  { kind: "stones", amount: 1 },
+  { kind: "coins", amount: 15 },
+  { kind: "points", amount: 100 },
+  { kind: "stones", amount: 2 },
+  { kind: "coins", amount: 25 },
+  { kind: "points", amount: 150 },
+];
+export function bonusLabel(reward) {
+  return `${reward.amount} ${{ coins: "XU", stones: "ĐÁ", points: "ĐIỂM" }[reward.kind]}`;
+}
 export const FRONT = 2.55;
 export const SIDE = 2.55;
 export const MAX_PIECES = 420;
@@ -59,7 +72,9 @@ export function createGame(random = Math.random, populated = true) {
       restitution: 0.08,
     }),
   );
-  fixedBox(world, [2.45, 0.15, 2.55], [0, -0.15, 0], material);
+  fixedBox(world, [2.45, 0.15, 3.1], [0, -0.15, -0.55], material);
+  for (const x of [-2.55, 2.55])
+    fixedBox(world, [0.1, 1.2, 3.125], [x, 1.1, -0.575], material);
   // Fixed rear wall strips coins from the upper shelf as it retracts.
   fixedBox(world, [2.6, 1.25, 0.12], [0, 1.1, -2.82], material);
   const shelfMaterial = new CANNON.Material("polished shelf");
@@ -71,8 +86,8 @@ export function createGame(random = Math.random, populated = true) {
   );
   const pusher = fixedBox(
     world,
-    [2.3, 0.3, 0.85],
-    [0, 0.3, -1.85],
+    [2.45, 0.3, 1.3],
+    [0, 0.3, -2.3],
     shelfMaterial,
     CANNON.Body.KINEMATIC,
   );
@@ -96,7 +111,8 @@ export function createGame(random = Math.random, populated = true) {
     collected: 0,
     bonuses: [],
     spin: null,
-    lastBonus: 0,
+    lastBonus: null,
+    bonusWheel: 0,
     flights: [],
     nextFlight: 0,
     rewards: [],
@@ -188,21 +204,20 @@ function collect(game, piece, front) {
   }
   if (piece.kind === "coin") {
     game.score++;
-    game.tokens++;
     game.frontCoins++;
     game.grace = 0;
     if (game.frontCoins % 20 === 0) {
       game.pendingStones++;
       game.message = "Đủ 20 xu cửa trước! Máy thả thêm một đá ngẫu nhiên.";
     } else
-      game.message = `Xu cửa trước: +1 điểm, +1 lượt. Tiến độ đá ${game.frontCoins % 20}/20 xu.`;
+      game.message = `Xu cửa trước: +1 điểm. Tiến độ đá ${game.frontCoins % 20}/20 xu.`;
   } else {
     game.collected++;
     game.score += 20;
-    game.bonuses.push([4, 6, 8, 12][Math.floor(game.random() * 4)]);
+    game.bonuses.push(false);
     game.message = `Đã nhận ${game.collected} đá! Màu nào cũng tính, bộ ${game.collected % 6}/6.`;
     if (game.collected % 6 === 0) {
-      game.bonuses.push(30);
+      game.bonuses.push(true);
       game.score += 100;
     }
   }
@@ -256,7 +271,7 @@ export function step(game, dt) {
     }
   }
   dispense(game, dt);
-  const targetZ = -1.85 + (0.8 * (1 - Math.cos((game.time * TAU) / 3.8))) / 2;
+  const targetZ = -2.3 + (0.8 * (1 - Math.cos((game.time * TAU) / 3.8))) / 2;
   game.pusher.velocity.z = (targetZ - game.pusher.position.z) / dt;
   // Every layer must wake so force can propagate to the front, not stop at sleeping bodies.
   if (game.pusher.velocity.z > 0)
@@ -272,19 +287,36 @@ export function step(game, dt) {
       collect(game, piece, front);
     }
   }
-  if (!game.spin && game.bonuses.length)
-    game.spin = { reward: game.bonuses.shift(), time: 1.2 };
+  if (!game.spin && game.bonuses.length) {
+    const superBonus = game.bonuses.shift();
+    const index = Math.floor(game.random() * BONUS_REWARDS.length);
+    const base = BONUS_REWARDS[index];
+    const reward = {
+      ...base,
+      amount: base.amount * (superBonus ? 3 : 1),
+      superBonus,
+    };
+    const start = game.bonusWheel;
+    const sectorAngle = (index * TAU) / BONUS_REWARDS.length;
+    const end = start + 4 * TAU + ((sectorAngle - (start % TAU) + TAU) % TAU);
+    game.spin = { reward, index, elapsed: 0, start, end };
+  }
   if (game.spin) {
-    game.spin.time -= dt;
-    if (game.spin.time <= 0) {
-      const reward = game.spin.reward;
-      game.tokens += reward;
+    const spin = game.spin;
+    spin.elapsed += dt;
+    const progress = Math.min(spin.elapsed / 2.5, 1);
+    game.bonusWheel =
+      spin.start + (spin.end - spin.start) * (1 - (1 - progress) ** 3);
+    if (progress === 1) {
+      const reward = spin.reward;
+      if (reward.kind === "coins") {
+        game.pendingCoins += reward.amount;
+        game.rewards.push({ remaining: reward.amount, aim: game.aim });
+      } else if (reward.kind === "stones") game.pendingStones += reward.amount;
+      else game.score += reward.amount;
       game.lastBonus = reward;
       game.grace = 0;
-      game.message =
-        reward === 30
-          ? "SUPER BONUS / JACKPOT! 6 đá bất kỳ: +30 credit, +100 điểm!"
-          : `Bonus Spin: +${reward} lượt thả xu!`;
+      game.message = `${reward.superBonus ? "SUPER BONUS / JACKPOT ×3" : "Bonus Spin"}: +${bonusLabel(reward)}! Credit không tăng.`;
       game.spin = null;
     }
   }

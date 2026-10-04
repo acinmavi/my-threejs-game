@@ -96,7 +96,7 @@ test("front coin rewards exactly once and side losses do not advance stone progr
   fall(g);
   step(g, 1 / 60);
   assert.equal(g.score, 1);
-  assert.equal(g.tokens, 51);
+  assert.equal(g.tokens, 50);
   assert.equal(g.frontCoins, 1);
   step(g, 1 / 60);
   assert.equal(g.score, 1);
@@ -127,45 +127,52 @@ test("every twenty front coins create one random stone, including repeated miles
   assert.equal(g.generatedStones, 3);
   assert.equal(g.pieces.filter((p) => p.kind === "stone").length, 3);
 });
-test("each stone triggers Bonus Spin even when every color is identical", () => {
-  const g = fresh();
-  fall(g, "stone", 0, 2.8, 0);
-  step(g, 1 / 60);
-  assert.equal(g.collected, 1);
-  assert.equal(g.score, 20);
-  assert.equal(g.tokens, 50);
-  advance(g, 1.3);
-  assert.equal(g.tokens, 58);
-  fall(g, "stone", 0, 2.8, 0);
-  step(g, 1 / 60);
-  advance(g, 1.3);
-  assert.equal(g.collected, 2);
-  assert.equal(g.score, 40);
-  assert.equal(g.tokens, 66);
-  assert.equal(
-    g.pieces.length,
-    0,
-    "collected stones only replenish through twenty-coin milestones",
-  );
+test("each stone queues its own wheel, with coins, stones or points and no credits", () => {
+  for (const [random, kind, amount] of [
+    [0, "coins", 8],
+    [0.26, "stones", 1],
+    [0.14, "points", 50],
+  ]) {
+    const g = fresh();
+    g.random = () => random;
+    fall(g, "stone", 0, 2.8, 0);
+    step(g, 1 / 60);
+    assert.equal(g.collected, 1);
+    assert.equal(g.spin.reward.kind, kind);
+    assert.equal(g.tokens, 50);
+    advance(g, 2.5);
+    assert.equal(g.lastBonus.amount, amount);
+    assert.equal(g.tokens, 50);
+    if (kind === "coins")
+      assert.equal(
+        g.pendingCoins + g.pieces.filter((p) => p.kind === "coin").length,
+        amount,
+      );
+    if (kind === "stones")
+      assert.equal(g.pendingStones + g.generatedStones, amount);
+    if (kind === "points") assert.equal(g.score, 20 + amount);
+    const angle =
+      ((g.bonusWheel % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    assert.ok(Math.abs(angle - (Math.floor(random * 8) * Math.PI) / 4) < 1e-8);
+  }
 });
-test("each six stones grant Super Bonus and Jackpot; side loss grants neither bonus nor respawn", () => {
+test("any six stones queue six spins and a triple Super Bonus; side loss does not count", () => {
   const g = fresh();
+  g.random = () => 0.14; // points keep the assertion independent of physical coin drops
   fall(g, "stone", 2.9, 1, 0);
   step(g, 1 / 60);
   assert.equal(g.collected, 0);
-  assert.equal(g.pieces.length, 0);
   for (let i = 0; i < 6; i++) fall(g, "stone", 0, 2.8, 0);
   step(g, 1 / 60);
+  assert.equal(g.bonuses.length, 6);
   assert.equal(g.score, 220);
-  advance(g, 9);
-  assert.equal(g.tokens, 128);
-  assert.equal(g.lastBonus, 30);
-  for (let i = 0; i < 6; i++) fall(g, "stone", 0, 2.8, 0);
-  step(g, 1 / 60);
-  advance(g, 9);
-  assert.equal(g.collected, 12);
-  assert.equal(g.score, 440);
-  assert.equal(g.tokens, 206);
+  advance(g, 18);
+  assert.equal(g.tokens, 50);
+  assert.equal(g.lastBonus.superBonus, true);
+  assert.equal(g.lastBonus.amount, 150);
+  assert.equal(g.score, 670);
+  assert.equal(g.spin, null);
+  assert.equal(g.bonuses.length, 0);
 });
 test("last credit waits for in-flight token, reward rain, bonuses and settling grace", () => {
   const g = fresh();
@@ -178,9 +185,8 @@ test("last credit waits for in-flight token, reward rain, bonuses and settling g
   assert.equal(g.phase, "playing");
   fall(g);
   step(g, 1 / 60);
-  assert.equal(g.tokens, 1);
-  assert.equal(g.grace, 0);
-  g.tokens = 0;
+  assert.equal(g.tokens, 0);
+  assert.ok(g.grace < 0.02);
   advance(g, 8.1);
   assert.equal(g.phase, "over");
   const t = g.time;
@@ -191,7 +197,7 @@ test("last credit waits for in-flight token, reward rain, bonuses and settling g
 test("upper shelf supports physical tokens and its retreat drops them to lower level", () => {
   const g = fresh();
   g.time = 1.9;
-  g.pusher.position.z = -1.05;
+  g.pusher.position.z = -1.5;
   const coin = addPiece(g, "coin", 0, 0.65, -0.3);
   advance(g, 0.1);
   assert.ok(coin.body.position.y > 0.5);
@@ -222,4 +228,20 @@ test("starting pile varies across rounds and real two-tier strokes produce front
     g.frontCoins > 0,
     "dense starting pile must have physical front drops",
   );
+});
+
+test("side walls contain coins and stones; rear shelf stays covered throughout stroke", () => {
+  const g = fresh();
+  const coin = addPiece(g, "coin", 2.2, 0.1, 1);
+  coin.body.velocity.x = 3;
+  const stone = addPiece(g, "stone", -2.1, 0.4, 0);
+  stone.body.velocity.x = -3;
+  for (let i = 0; i < 60 * 4; i++) {
+    step(g, 1 / 60);
+    assert.ok(g.pusher.position.z - g.pusher.shapes[0].halfExtents.z < -2.7);
+    assert.ok(coin.body.position.x < 2.5 && stone.body.position.x > -2.5);
+  }
+  assert.equal(g.lost, 0);
+  assert.ok(coin.body.position.y >= 0);
+  assert.ok(stone.body.position.y >= 0);
 });
