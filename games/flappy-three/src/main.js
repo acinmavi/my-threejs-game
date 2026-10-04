@@ -1,3 +1,4 @@
+import { setupGameExit } from '../../../src/exit-dialog.js';
 import * as THREE from 'three';
 import './style.css';
 import { createGame, flap, step, RULES, difficulty } from './game.js';
@@ -146,7 +147,7 @@ $('sound').addEventListener('click', () => {
 window.addEventListener('keydown', event => {
   if (event.repeat || event.target.closest('button, a, input')) return;
   if (event.code === 'Space' || event.code === 'ArrowUp') { event.preventDefault(); action(); }
-  if (event.code === 'KeyP' || event.code === 'Escape') togglePause();
+  if (event.code === 'KeyP') togglePause();
   if (event.code === 'Enter' && game.phase === 'over') start();
 });
 document.addEventListener('visibilitychange', () => { if (document.hidden && !paused && game.phase === 'playing') togglePause(); last = 0; });
@@ -177,3 +178,5 @@ renderer.setAnimationLoop(time => {
   }
   renderer.render(scene, camera);
 });
+
+setupGameExit({ isPlaying: () => game.phase === 'playing', isPaused: () => paused, togglePause });

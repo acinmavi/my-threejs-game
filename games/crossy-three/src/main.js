@@ -1,3 +1,4 @@
+import { setupGameExit } from '../../../src/exit-dialog.js';
 import * as THREE from 'three';
 import './style.css';
 import { createGame, move, step, position, carX, trainState, difficulty } from './game.js';
@@ -198,7 +199,7 @@ window.addEventListener('keydown', event => {
   if (directions[event.code]) {
     event.preventDefault(); if (game.phase === 'ready') start(); else hop(...directions[event.code]);
   }
-  if (!event.repeat && (event.code === 'KeyP' || event.code === 'Escape')) togglePause();
+  if (!event.repeat && (event.code === 'KeyP')) togglePause();
   if (!event.repeat && event.code === 'Enter' && game.phase === 'over') start();
 });
 document.querySelectorAll('.dpad button').forEach(button => button.addEventListener('click', () => {
@@ -258,3 +259,5 @@ renderer.setAnimationLoop(time => {
   sun.position.set(-6, 14, focus + 8); sun.target.position.set(0, 0, focus);
   renderer.render(scene, camera);
 });
+
+setupGameExit({ isPlaying: () => game.phase === 'playing', isPaused: () => paused, togglePause });

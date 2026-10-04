@@ -14,7 +14,7 @@ Open the local URL printed by Vite. Requires Node.js 20.19+ or 22.12+ and a brow
 ## Controls
 
 - Space, Arrow Up, click or tap the scene: flap.
-- P / Escape or pause button: pause and resume.
+- P or pause button: pause and resume.
 - Enter after game over, or the replay button: start a new run.
 - Sound button: enable or mute generated audio.
 
@@ -30,3 +30,5 @@ rtk npm run build
 ```
 
 Physics runs at a fixed 120 Hz. The tests cover starting, gravity, pipe collisions, one-time scoring, frozen game-over state and frame-rate consistency.
+
+In the Sky Club collection, Escape and Home open an exit confirmation. Cancel resumes the prior play/pause state.

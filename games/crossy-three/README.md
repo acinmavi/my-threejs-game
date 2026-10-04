@@ -16,7 +16,7 @@ Open http://127.0.0.1:5174/. Requires Node.js 20.19+ or 22.12+ and WebGL 2. Goog
 - Arrow keys / WASD: hop one tile; hold to keep hopping.
 - Space, click or tap the scene: forward.
 - Swipe the scene or use the direction buttons: move on touch screens.
-- P / Escape or pause button: pause and resume.
+- P or pause button: pause and resume.
 - Enter after a collision, or replay button: new run.
 - Sound button: enable generated sound effects.
 
@@ -38,3 +38,5 @@ rtk npm run build
 ```
 
 Simulation runs at 120 Hz. Tests cover hop completion, scoring, interpolation, blocked moves, traffic collision, traffic wrapping and bounded lane generation.
+
+In the Sky Club collection, Escape and Home open an exit confirmation. Cancel resumes the prior play/pause state.

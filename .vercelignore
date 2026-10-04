@@ -1,0 +1,9 @@
+.archive/
+.git/
+node_modules/
+games/*/test/
+games/*/package-lock.json
+games/*/README.md
+games/*/difficulty-preview.jpg
+games/*/expansion-preview.jpg
+games/*/progressive-preview.jpg
