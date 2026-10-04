@@ -1,8 +1,16 @@
 const TAU = Math.PI * 2;
-export function createGame(level = 1, random = Math.random) {
+export const MODES = {
+  easy: { label: 'Dễ', acceleration: .015 },
+  normal: { label: 'Thường', acceleration: .04 },
+  hard: { label: 'Khó', acceleration: .08 },
+};
+export function createGame(level = 1, random = Math.random, { mode = 'normal', elapsed = 0 } = {}) {
+  if (!MODES[mode]) mode = 'normal';
+  elapsed = Math.max(0, elapsed);
   level = Math.max(1, Math.floor(level));
-  const game = { level, phase: 'ready', angle: 0, direction: 1, hits: 0, progress: 0,
-    speed: Math.min(5.5, 1.8 + (level - 1) * .2), tolerance: Math.max(.075, .17 - (level - 1) * .004), random };
+  const baseSpeed = Math.min(5.5, 1.8 + (level - 1) * .2);
+  const game = { level, mode, elapsed, baseSpeed, phase: 'ready', angle: 0, direction: 1, hits: 0, progress: 0,
+    speed: Math.min(5.5, baseSpeed + MODES[mode].acceleration * elapsed), tolerance: Math.max(.075, .17 - (level - 1) * .004), random };
   nextTarget(game); return game;
 }
 function nextTarget(game) {
@@ -12,7 +20,11 @@ function nextTarget(game) {
 }
 export function step(game, dt) {
   if (game.phase !== 'playing' || dt <= 0) return;
-  const travel = game.speed * dt;
+  const acceleration = MODES[game.mode].acceleration;
+  const accelerating = Math.min(dt, Math.max(0, (5.5 - game.speed) / acceleration));
+  const travel = game.speed * accelerating + .5 * acceleration * accelerating ** 2 + 5.5 * (dt - accelerating);
+  game.elapsed += dt;
+  game.speed = Math.min(5.5, game.baseSpeed + acceleration * game.elapsed);
   game.progress += travel;
   game.angle = ((game.angle + game.direction * travel) % TAU + TAU) % TAU;
   if (game.progress > game.distance + game.tolerance) game.phase = 'over';

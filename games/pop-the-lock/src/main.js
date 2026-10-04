@@ -1,9 +1,12 @@
 import * as THREE from 'three';
 import './style.css';
-import { createGame, step, tap } from './game.js';
+import { createGame, step, tap, MODES } from './game.js';
 import { setupGameExit } from '../../../src/exit-dialog.js';
 const $ = id => document.getElementById(id);
-let game = createGame(), paused = false, best = 0, muted = true, audio, last = 0;
+let selectedMode = 'normal';
+try { const saved = localStorage.getItem('pop-lock-mode'); if (MODES[saved]) selectedMode = saved; } catch {}
+$('mode').value = selectedMode;
+let game = createGame(1, Math.random, { mode: selectedMode }), paused = false, best = 0, muted = true, audio, last = 0;
 try { best = Number(localStorage.getItem('pop-lock-best')) || 0; } catch {}
 $('best').textContent = String(best).padStart(2, '0');
 const scene = new THREE.Scene(); scene.background = new THREE.Color('#203e3b');
@@ -41,11 +44,13 @@ function tone(frequency) {
 }
 function card(label, title, copy, button) {
   $('card-label').textContent = label; $('card-title').textContent = title; $('card-copy').textContent = copy;
+  $('mode-picker').hidden = game.phase === 'playing';
   $('play').textContent = button; $('overlay').hidden = false; $('tap').disabled = true;
 }
 function start() {
   const level = game.phase === 'won' ? game.level + 1 : game.phase === 'over' ? game.level : 1;
-  game = createGame(level); game.phase = 'playing'; paused = false; last = 0;
+  const elapsed = game.phase === 'won' ? game.elapsed : 0;
+  game = createGame(level, Math.random, { mode: selectedMode, elapsed }); game.phase = 'playing'; paused = false; last = 0;
   refreshZone(); $('overlay').hidden = true; $('tap').disabled = false; $('pause').disabled = false;
   $('pause').textContent = 'Ⅱ'; $('pause').setAttribute('aria-label', 'Tạm dừng');
   $('tip').textContent = 'Bấm khi kim nằm trong vùng xanh. Mỗi lần trúng sẽ đổi chiều.';
@@ -69,6 +74,16 @@ function togglePause() {
   else { $('overlay').hidden = true; $('tap').disabled = false; }
   document.activeElement?.blur();
 }
+const modeDescriptions = { easy: 'Tăng chậm: +0.15 rad/s mỗi 10 giây chơi.', normal: 'Tăng vừa: +0.40 rad/s mỗi 10 giây chơi.', hard: 'Tăng nhanh: +0.80 rad/s mỗi 10 giây chơi.' };
+function updateMode() {
+  selectedMode = $('mode').value;
+  $('mode-description').textContent = modeDescriptions[selectedMode];
+  try { localStorage.setItem('pop-lock-mode', selectedMode); } catch {}
+  game = createGame(1, Math.random, { mode: selectedMode }); refreshZone();
+  card('MỞ KHÓA ĐẦU TIÊN', 'Bắt đúng nhịp.', 'Bấm khi kim vàng nằm trong vùng xanh. Mỗi lần trúng, kim đổi chiều. Thời gian tăng tốc được giữ khi qua màn; thử lại sẽ đặt lại.', 'Bắt đầu →');
+}
+$('mode').addEventListener('change', updateMode);
+$('mode-description').textContent = modeDescriptions[selectedMode];
 $('play').addEventListener('click', () => paused ? togglePause() : start());
 $('tap').addEventListener('pointerdown', event => { event.preventDefault(); attempt(); });
 $('tap').addEventListener('click', event => { if (event.detail === 0) attempt(); });
@@ -89,7 +104,7 @@ function frame(now) {
   needle.position.set(Math.sin(game.angle) * 2, Math.cos(game.angle) * 2, .2); needle.rotation.z = -game.angle;
   target.position.set(Math.sin(game.target) * 2, Math.cos(game.target) * 2, .2);
   zone.rotation.z = Math.PI / 2 - game.target - game.tolerance;
-  $('remaining').textContent = game.level - game.hits; $('level').textContent = `MÀN ${String(game.level).padStart(2, '0')}`; $('speed').textContent = `${game.speed.toFixed(2)} RAD/S`;
+  $('remaining').textContent = game.level - game.hits; $('level').textContent = `MÀN ${String(game.level).padStart(2, '0')}`; $('speed').textContent = `${MODES[game.mode].label.toUpperCase()} · ${game.speed.toFixed(2)} RAD/S · ${Math.floor(game.elapsed)}s`;
   renderer.render(scene, camera); requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
