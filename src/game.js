@@ -1,4 +1,9 @@
 export const HOP_TIME = .18;
+export function difficulty(row) {
+  const distance = Math.min(Math.max(row, 0), 240);
+  return { roadWidth: Math.min(5, 2 + Math.floor(distance / 48)),
+    speedMultiplier: 1 + distance / 240 * 1.5, level: 1 + Math.floor(distance / 48) };
+}
 export function trainState(lane, time) {
   const phase = (time + lane.trainOffset) % 12;
   return { warning: phase >= 7 && phase < 9, active: phase >= 9 && phase < 10.6,
@@ -11,8 +16,13 @@ const seed = (row, salt = 0) => {
 };
 function laneAt(row) {
   const part = row % 24;
-  const type = row < 3 ? 'grass' : [9, 10].includes(part) ? 'river' : part === 16 ? 'train' : [3, 4, 6, 13, 14, 19, 20].includes(part) ? 'road' : 'grass';
+  const level = difficulty(row);
+  const roadPart = (part >= 3 && part < 3 + level.roadWidth) ||
+    (part >= 19 && part < 19 + level.roadWidth) || [13, 14].includes(part) || (part === 6 && level.roadWidth === 2);
+  const type = row < 3 ? 'grass' : [9, 10].includes(part) ? 'river' : part === 16 ? 'train' : roadPart ? 'road' : 'grass';
   const road = type === 'road';
+  const speed = road ? (.95 + seed(part, 1) * 1.1) * level.speedMultiplier : type === 'river' ? .8 + seed(row, 3) * .45 : 0;
+  const period = road ? 26 * Math.max(1, speed / 3.4) : 26;
   const blocked = new Set();
   if (type === 'grass' && row > 1) {
     for (let x = -4; x <= 4; x++) if (x !== 0 && seed(row, x + 8) > .85) blocked.add(x);
@@ -20,11 +30,11 @@ function laneAt(row) {
   return {
     row, type, blocked,
     direction: row % 2 ? 1 : -1,
-    speed: road ? Math.min(3.4, 1.05 + seed(row, 1) * 1.6 + row * .008) : type === 'river' ? .8 + seed(row, 3) * .45 : 0,
+    speed, period,
     trainOffset: seed(row, 4) * 4,
     logs: type === 'river' ? Array.from({ length: 3 }, (_, i) => ({ offset: seed(row, 7) * 26 + i * 26 / 3, length: 4.5 })) : [],
     cars: road ? Array.from({ length: 2 }, (_, i) => ({
-      offset: seed(row, 2) * 26 + i * 13,
+      offset: seed(row, 2) * period + i * period / 2,
       length: seed(row, i + 3) > .7 ? 2.25 : 1.5,
       color: colors[Math.floor(seed(row, i + 5) * colors.length)],
     })) : [],
@@ -54,7 +64,8 @@ export function position(game) {
     row: hop.fromRow + (hop.toRow - hop.fromRow) * t, height: Math.sin(t * Math.PI) * .48 };
 }
 export function carX(lane, car, time) {
-  return ((car.offset + lane.direction * lane.speed * time) % 26 + 26) % 26 - 13;
+  const period = lane.period ?? 26;
+  return ((car.offset + lane.direction * lane.speed * time) % period + period) % period - period / 2;
 }
 export function step(game, dt) {
   if (game.phase !== 'playing') return;

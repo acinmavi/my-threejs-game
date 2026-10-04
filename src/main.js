@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import './style.css';
-import { createGame, move, step, position, carX, trainState } from './game.js';
+import { createGame, move, step, position, carX, trainState, difficulty } from './game.js';
 
 const $ = id => document.getElementById(id);
 let game = createGame(), paused = false, muted = true, audio, best = 0;
@@ -75,11 +75,11 @@ function makeLane(lane) {
   const vehicles = [], logs = [], signals = [];
   let train;
   if (lane.type === 'road') {
-    box(group, '#68726a', [26, .15, .98], [0, -.09, 0]);
+    box(group, '#68726a', [44, .15, .98], [0, -.09, 0]);
     for (let x = -12; x < 13; x += 1.5) box(group, '#c0c5aa', [.55, .012, .025], [x, -.009, -.44]);
     for (const car of lane.cars) { const vehicle = carModel(car, lane.direction); group.add(vehicle); vehicles.push(vehicle); }
   } else if (lane.type === 'river') {
-    box(group, '#65a6b0', [26, .13, .98], [0, -.14, 0]);
+    box(group, '#65a6b0', [44, .13, .98], [0, -.14, 0]);
     for (let x = -12; x < 13; x += 1.2) box(group, '#9fc9c4', [.35, .008, .025], [x, -.07, (x % 2) * .1]);
     for (const log of lane.logs) {
       const raft = new THREE.Group();
@@ -89,9 +89,9 @@ function makeLane(lane) {
       group.add(raft); logs.push(raft);
     }
   } else if (lane.type === 'train') {
-    box(group, '#a6a18d', [26, .13, .98], [0, -.085, 0]);
+    box(group, '#a6a18d', [44, .13, .98], [0, -.085, 0]);
     for (let x = -12; x <= 12; x += .65) box(group, '#806b56', [.15, .045, .8], [x, -.01, 0]);
-    for (const z of [-.28, .28]) box(group, '#d1d2c2', [26, .07, .06], [0, .025, z]);
+    for (const z of [-.28, .28]) box(group, '#d1d2c2', [44, .07, .06], [0, .025, z]);
     for (const x of [-4.8, 4.8]) {
       box(group, '#535f50', [.09, 1.1, .09], [x, .55, .37]);
       box(group, '#39493e', [.35, .3, .14], [x, 1.13, .37]);
@@ -107,7 +107,7 @@ function makeLane(lane) {
     box(train, '#f9e3a2', [.05, .14, .42], [3.85, .45, 0]);
     group.add(train);
   } else {
-    box(group, lane.row % 2 ? '#96b476' : '#9dbb7e', [26, .18, .98], [0, -.09, 0]);
+    box(group, lane.row % 2 ? '#96b476' : '#9dbb7e', [44, .18, .98], [0, -.09, 0]);
     for (let x = -4; x <= 4; x++) box(group, (x + lane.row) % 2 ? '#a4bd82' : '#a9c488', [.98, .022, .96], [x, .001, 0]);
     for (const x of lane.blocked) tree(group, x, 0, (x + lane.row) % 2 === 0);
     for (const side of [-1, 1]) {
@@ -245,6 +245,8 @@ renderer.setAnimationLoop(time => {
   deadline.visible = game.phase === 'playing' && game.time > 8;
   if (!paused) cameraRow += (game.cameraRow - cameraRow) * (1 - Math.exp(-dt * 6));
   const lag = game.cameraRow - p.row;
+  const level = difficulty(game.score);
+  $('difficulty').textContent = `CẤP ${level.level} · ĐƯỜNG ${level.roadWidth} LÀN · XE ${level.speedMultiplier.toFixed(2)}×`;
   $('pressure').textContent = game.time < 8 ? `CHUẨN BỊ: ${Math.ceil(8 - game.time)} GIÂY` : lag > 2.2 ? '⚠ TIẾN LÊN — SẮP BỊ BỎ LẠI' : '↑ CAMERA ĐANG KÉO';
   $('pressure').classList.toggle('urgent', lag > 2.2);
   if (game.phase === 'playing' && !paused) {

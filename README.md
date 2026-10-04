@@ -20,7 +20,9 @@ Open http://127.0.0.1:5174/. Requires Node.js 20.19+ or 22.12+ and WebGL 2. Goog
 - Enter after a collision, or replay button: new run.
 - Sound button: enable generated sound effects.
 
-New furthest rows award points. Cars travel in both directions at different speeds and lengths. Two cars per 26-unit loop leave larger crossing windows; road speeds range from 1.05 to a maximum of 3.4 units/s. Even the fastest lane leaves more than 2.9 seconds of clear crossing time at a fixed column.
+New furthest rows award points. Cars travel in both directions at different speeds and lengths. Road crossings grow from 2 to 3, 4 and 5 consecutive lanes at distances 0, 48, 96 and 144. Traffic speed scales continuously with distance up to 2.5× at row 240; each lane keeps its own base speed. The HUD shows the current level, maximum road width and speed multiplier.
+
+Two cars per loop leave larger crossing windows. At speeds above 3.4 units/s, vehicle spacing increases proportionally, so even the fastest lane leaves more than 2.9 seconds of clear crossing time at a fixed column. Grass banks before rivers and train tracks remain available for waiting. Existing lanes retain their generated properties.
 
 After eight seconds of grace, the camera advances at 0.2–0.3 rows/s and follows forward progress. Falling 3.5 rows behind ends the run. A red trailing line and warning show when you are falling behind. Grass breaks let you wait between hazards.
 
