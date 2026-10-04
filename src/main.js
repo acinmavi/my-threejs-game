@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import './style.css';
-import { createGame, move, step, position, carX } from './game.js';
+import { createGame, move, step, position, carX, trainState } from './game.js';
 
 const $ = id => document.getElementById(id);
 let game = createGame(), paused = false, muted = true, audio, best = 0;
@@ -54,6 +54,7 @@ const wings = [-1, 1].map(side => box(chicken, '#e8e4c7', [.07, .22, .33], [side
 box(chicken, '#efecd6', [.25, .24, .1], [0, .66, .31]);
 const marker = new THREE.Mesh(new THREE.RingGeometry(.36, .4, 32), new THREE.MeshBasicMaterial({ color:'#fff8d8', transparent:true, opacity:.7, side:THREE.DoubleSide }));
 marker.rotation.x = -Math.PI / 2; marker.position.y = .02; scene.add(marker);
+const deadline = box(scene, '#d48062', [26, .015, .05], [0, .032, 3.5]);
 const laneMeshes = new Map();
 function carModel(car, direction) {
   const group = new THREE.Group();
@@ -71,11 +72,40 @@ function carModel(car, direction) {
 }
 function makeLane(lane) {
   const group = new THREE.Group(); group.position.z = -lane.row;
-  const vehicles = [];
+  const vehicles = [], logs = [], signals = [];
+  let train;
   if (lane.type === 'road') {
     box(group, '#68726a', [26, .15, .98], [0, -.09, 0]);
     for (let x = -12; x < 13; x += 1.5) box(group, '#c0c5aa', [.55, .012, .025], [x, -.009, -.44]);
     for (const car of lane.cars) { const vehicle = carModel(car, lane.direction); group.add(vehicle); vehicles.push(vehicle); }
+  } else if (lane.type === 'river') {
+    box(group, '#65a6b0', [26, .13, .98], [0, -.14, 0]);
+    for (let x = -12; x < 13; x += 1.2) box(group, '#9fc9c4', [.35, .008, .025], [x, -.07, (x % 2) * .1]);
+    for (const log of lane.logs) {
+      const raft = new THREE.Group();
+      box(raft, '#a98355', [log.length, .22, .7], [0, .025, 0]);
+      box(raft, '#c5a26e', [log.length - .08, .015, .05], [0, .142, -.18]);
+      box(raft, '#c5a26e', [log.length - .08, .015, .05], [0, .142, .18]);
+      group.add(raft); logs.push(raft);
+    }
+  } else if (lane.type === 'train') {
+    box(group, '#a6a18d', [26, .13, .98], [0, -.085, 0]);
+    for (let x = -12; x <= 12; x += .65) box(group, '#806b56', [.15, .045, .8], [x, -.01, 0]);
+    for (const z of [-.28, .28]) box(group, '#d1d2c2', [26, .07, .06], [0, .025, z]);
+    for (const x of [-4.8, 4.8]) {
+      box(group, '#535f50', [.09, 1.1, .09], [x, .55, .37]);
+      box(group, '#39493e', [.35, .3, .14], [x, 1.13, .37]);
+      signals.push(box(group, '#bbbd82', [.2, .15, .03], [x, 1.13, .46]));
+    }
+    train = new THREE.Group(); train.scale.x = lane.direction;
+    for (const x of [-2.6, 0, 2.6]) {
+      box(train, '#bd594b', [2.45, .75, .7], [x, .48, 0]);
+      box(train, '#ead3a0', [2.4, .14, .72], [x, .9, 0]);
+      for (const offset of [-.7, 0, .7]) box(train, '#475f62', [.4, .22, .025], [x + offset, .62, .367]);
+      box(train, '#3e4b42', [2, .12, .78], [x, .14, 0]);
+    }
+    box(train, '#f9e3a2', [.05, .14, .42], [3.85, .45, 0]);
+    group.add(train);
   } else {
     box(group, lane.row % 2 ? '#96b476' : '#9dbb7e', [26, .18, .98], [0, -.09, 0]);
     for (let x = -4; x <= 4; x++) box(group, (x + lane.row) % 2 ? '#a4bd82' : '#a9c488', [.98, .022, .96], [x, .001, 0]);
@@ -89,7 +119,7 @@ function makeLane(lane) {
       for (let x = -4; x <= 4; x++) box(group, '#e3e4b9', [.4, .015, .09], [x, .022, .4]);
     }
   }
-  scene.add(group); return { group, vehicles };
+  scene.add(group); return { group, vehicles, logs, train, signals, warned: false };
 }
 function syncWorld() {
   for (const [row, view] of laneMeshes) if (!game.lanes.has(row)) { scene.remove(view.group); laneMeshes.delete(row); }
@@ -97,6 +127,14 @@ function syncWorld() {
     if (!laneMeshes.has(row)) laneMeshes.set(row, makeLane(lane));
     const view = laneMeshes.get(row);
     lane.cars.forEach((car, i) => { view.vehicles[i].position.x = carX(lane, car, game.time); });
+    lane.logs.forEach((log, i) => { view.logs[i].position.x = carX(lane, log, game.time); });
+    if (view.train) {
+      const state = trainState(lane, game.time);
+      view.train.visible = state.active; view.train.position.x = state.x;
+      view.signals.forEach(signal => { signal.material = mat((state.warning || state.active) && Math.floor(game.time * 5) % 2 ? '#f65e42' : '#e2c784'); });
+      if (state.warning && !view.warned && game.phase === 'playing' && Math.abs(lane.row - game.row) < 5) tone(220, .3);
+      view.warned = state.warning;
+    }
   }
 }
 function tone(frequency, duration = .07) {
@@ -142,8 +180,10 @@ function endRun() {
   try { localStorage.setItem('crossy-sky-best', String(best)); } catch {}
   $('best').textContent = String(best).padStart(2, '0'); $('pause').disabled = true;
   $('flash').classList.remove('hit'); void $('flash').offsetWidth; $('flash').classList.add('hit');
-  $('tip').textContent = 'Lần sau, nhìn cả hai bên nhé.';
-  card(record ? 'KỶ LỤC MỚI!' : 'THỬ THÊM MỘT CHUYẾN?', 'Ối, gặp xe rồi!', `Bạn đi được ${game.score} hàng. Kỷ lục: ${best}.`, 'Đi lần nữa', 'ENTER / NÚT ĐI LẦN NỮA ĐỂ CHƠI LẠI');
+  const messages = { car: ['Ối, gặp xe rồi!', 'Nhìn hai bên trước khi qua đường nhé.'], water: ['Tõm! Rơi xuống sông.', 'Nhảy lên khúc gỗ và đừng trôi ra ngoài bờ.'], train: ['Tàu chạy qua rồi!', 'Đèn đỏ báo tàu tới — đợi tàu đi qua nhé.'], camera: ['Bạn bị bỏ lại rồi!', 'Camera kéo dần. Đừng đứng yên quá lâu nhé.'] };
+  const [title, advice] = messages[game.reason] ?? messages.car;
+  $('tip').textContent = advice;
+  card(record ? 'KỶ LỤC MỚI!' : 'THỬ THÊM MỘT CHUYẾN?', title, `Bạn đi được ${game.score} hàng. ${advice}`, 'Đi lần nữa', 'ENTER / NÚT ĐI LẦN NỮA ĐỂ CHƠI LẠI');
 }
 $('play').addEventListener('click', () => paused ? togglePause() : start());
 $('pause').addEventListener('click', togglePause);
@@ -196,11 +236,21 @@ renderer.setAnimationLoop(time => {
   if (before === 'playing' && game.phase === 'over') endRun();
   if (game.score !== previousScore) $('score').textContent = game.score;
   syncWorld(); const p = position(game);
-  chicken.position.set(p.x, p.height, -p.row); chicken.rotation.y = facing;
+  const onRiver = game.lanes.get(Math.round(p.row))?.type === 'river';
+  chicken.position.set(p.x, p.height + (onRiver ? .14 : 0), -p.row); chicken.rotation.y = facing;
   chicken.rotation.z = game.phase === 'over' ? -Math.PI / 2 : 0;
   wings.forEach((wing, i) => { wing.rotation.z = game.hop ? Math.sin(p.height * 4) * (i ? -.5 : .5) : 0; });
-  marker.position.set(p.x, .025, -p.row); marker.visible = game.phase !== 'over';
-  cameraRow += (game.score - cameraRow) * (1 - Math.exp(-dt * 6));
+  marker.position.set(p.x, onRiver ? .15 : .025, -p.row); marker.visible = game.phase !== 'over';
+  deadline.position.z = -(game.cameraRow - 3.5);
+  deadline.visible = game.phase === 'playing' && game.time > 8;
+  if (!paused) cameraRow += (game.cameraRow - cameraRow) * (1 - Math.exp(-dt * 6));
+  const lag = game.cameraRow - p.row;
+  $('pressure').textContent = game.time < 8 ? `CHUẨN BỊ: ${Math.ceil(8 - game.time)} GIÂY` : lag > 2.2 ? '⚠ TIẾN LÊN — SẮP BỊ BỎ LẠI' : '↑ CAMERA ĐANG KÉO';
+  $('pressure').classList.toggle('urgent', lag > 2.2);
+  if (game.phase === 'playing' && !paused) {
+    const nearbyTrain = [...game.lanes.values()].find(lane => lane.type === 'train' && lane.row >= p.row && lane.row - p.row < 4 && (trainState(lane, game.time).warning || trainState(lane, game.time).active));
+    $('tip').textContent = lag > 2.2 ? 'Tiến lên! Vạch đỏ sắp tới rồi.' : nearbyTrain ? '⚠ Tàu sắp tới — đợi ở bãi cỏ!' : onRiver ? 'Khúc gỗ đang trôi — đừng ra khỏi bờ!' : 'Né xe · Nhảy lên gỗ · Chú ý đèn tàu';
+  }
   const focus = -cameraRow - 2.5;
   camera.position.set(8, 11, focus + 12); camera.lookAt(0, 0, focus);
   sun.position.set(-6, 14, focus + 8); sun.target.position.set(0, 0, focus);
