@@ -34,3 +34,5 @@ Pop the Lock: `/games/pop-the-lock/` — bấm đúng nhịp, đổi chiều sau
 Claw Club: `/games/claw-machine/` — máy gắp gấu 3D, 3 lượt/ván, 20 giây căn; WASD/nút chạm di chuyển, Space gắp, P pause, Esc Home.
 
 Infinity Pusher: `/games/coin-pusher/` — 50 credit/ván, vòng quay thưởng 1–15 xu, bàn đẩy hai tầng với vật lý Cannon ES; mỗi 20 xu cửa trước sinh đá, mỗi đá mở Bonus Spin, 6 đá bất kỳ mở Jackpot. A D/mũi tên/thanh trượt căn vị trí, Space/nút chạm bắn (1 xu mỗi lần), P pause, Esc Home.
+
+Treasure Ball: `/games/treasure-ball/` — bảng đinh Plinko vật lý, bóng trắng/vàng trên bàn đẩy hai tầng, vòng bonus và rương 3 chìa. 50 credit/ván; Space thả, A/D căn, P pause, Esc Home.

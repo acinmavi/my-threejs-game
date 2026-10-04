@@ -1,0 +1,61 @@
+@import "../../coin-pusher/src/style.css";
+.game-frame {
+  height: 740px;
+  background: #c7c1d3;
+}
+.hud {
+  color: #584365;
+  max-width: calc(100% - 50px);
+}
+.hud #tokens {
+  color: #9d7339;
+}
+.stones {
+  max-width: 240px;
+  background: #fcf5e9ed;
+  top: 85px;
+}
+#key-progress {
+  display: block;
+  margin: 10px 0;
+  color: #7f6092;
+}
+#bonus {
+  display: block;
+  font-size: 8px;
+  line-height: 1.8;
+}
+#overlay {
+  width: 390px;
+}
+#fire {
+  background: #665079;
+}
+#aim {
+  accent-color: #816496;
+}
+#tip {
+  color: #665174;
+}
+@media (max-width: 700px) {
+  .game-frame {
+    height: 680px;
+    max-height: none;
+    min-height: 600px;
+  }
+  .stones {
+    top: 71px;
+    left: 12px;
+    padding: 8px;
+    max-width: 200px;
+  }
+  #key-progress {
+    margin: 7px 0;
+  }
+  #bonus {
+    font-size: 6px;
+  }
+  #overlay {
+    width: calc(100% - 32px);
+  }
+}

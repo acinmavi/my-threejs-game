@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#f2f3e9" />
+    <title>Treasure Ball · Sky Club</title>
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <a class="brand" href="/"
+          ><span>✦</span> SKY CLUB <small>ARCADE / 006</small></a
+        ><button id="sound" aria-label="Bật âm thanh" aria-pressed="false">
+          ♪ Âm thanh: tắt
+        </button>
+      </header>
+      <section class="intro">
+        <div>
+          <div class="eyebrow">MỘT QUẢ BÓNG. MỘT KHO BÁU.</div>
+          <h1>Treasure <em>Ball</em><i>↗</i></h1>
+          <p>Thả qua bảng đinh. Đẩy bóng vàng. Mở kho báu.</p>
+        </div>
+        <div class="record">
+          <span>KỶ LỤC ĐIỂM</span><strong id="best">00</strong>
+        </div>
+      </section>
+      <section class="game-frame" aria-label="Máy thả và đẩy bóng 3D">
+        <div id="world"></div>
+        <div class="hud">
+          <span id="tokens">50 CREDIT</span><span id="score">0 ĐIỂM</span
+          ><span id="wheel-status">PLINKO → BÀN ĐẨY</span
+          ><button id="pause" aria-label="Tạm dừng" disabled>Ⅱ</button>
+        </div>
+        <div class="stones" aria-label="Tiến độ kho báu">
+          <span id="ball-progress">BÓNG LỚN 0 · BỘ 0/6</span>
+          <span id="key-progress">CHÌA 0/3 · RƯƠNG 0</span>
+          <b id="bonus">BÓNG LỚN RƠI → VÒNG THƯỞNG</b>
+        </div>
+        <div id="overlay">
+          <span id="card-label">50 CREDIT · SĂN BÓNG VÀNG</span>
+          <h2 id="card-title">Kho báu chờ bạn.</h2>
+          <p id="card-copy">
+            Mỗi lượt dùng 1 credit để thả bóng trắng qua bảng đinh. Ô trúng
+            thưởng bóng nhỏ, bóng lớn, điểm hoặc chìa khóa. Bóng đổ lên bàn đẩy:
+            bóng nhỏ rơi +2 điểm, bóng vàng rơi mở vòng bonus. Đủ 6 bóng vàng có
+            Super Bonus ×3; 3 chìa mở rương. Credit không tự tăng.
+          </p>
+          <button id="play">Bắt đầu ván →</button>
+        </div>
+        <div id="tip" aria-live="polite">
+          Căn vị trí thả bóng trên bảng đinh.
+        </div>
+      </section>
+      <div class="controls">
+        <label class="aim-control" for="aim"
+          ><span>VỊ TRÍ THẢ <b id="aim-value">GIỮA</b></span
+          ><input
+            id="aim"
+            type="range"
+            min="-1.9"
+            max="1.9"
+            step="0.05"
+            value="0"
+            disabled
+          /><small>← → / A D · TRÁI — GIỮA — PHẢI</small></label
+        ><button id="fire" disabled>
+          THẢ BÓNG <small>SPACE · 1 CREDIT / LẦN</small>
+        </button>
+      </div>
+      <footer>
+        <span>Bóng nhỏ +2 điểm · Bóng vàng → Bonus · 3 chìa → Rương</span
+        ><span>P tạm dừng · Esc về Home</span>
+      </footer>
+    </main>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

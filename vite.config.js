@@ -10,5 +10,6 @@ export default defineConfig({
     lock: entry('./games/pop-the-lock/index.html'),
     claw: entry('./games/claw-machine/index.html'),
     pusher: entry('./games/coin-pusher/index.html'),
+    treasure: entry('./games/treasure-ball/index.html'),
   } } },
 });
