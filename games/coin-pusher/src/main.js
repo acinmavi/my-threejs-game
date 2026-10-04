@@ -334,7 +334,9 @@ function togglePause() {
   document.activeElement?.blur();
 }
 function fire() {
-  if (!paused && shoot(game)) tone(320);
+  if (paused || !shoot(game)) return;
+  tone(320);
+  if (game.phase === "over") finish();
 }
 function finish() {
   best = Math.max(best, game.score);
@@ -346,7 +348,7 @@ function finish() {
   clearInput();
   card(
     "HẾT CREDIT",
-    "Một ván thật đã.",
+    "Game over.",
     `${game.score} điểm · ${game.collected} đá · ${game.shots} xu đã bắn. Căn ô thưởng trên vòng quay và tránh khe hai bên để chơi lâu hơn.`,
     "Chơi ván mới →",
   );
@@ -498,18 +500,24 @@ function frame(now) {
       `Tiến độ ${i + 1}/6: ${i < game.collected % 6 ? "đã thu" : "chưa thu"}`,
     );
   }
-  $("bonus").textContent = game.spin
-    ? `${game.spin.reward.superBonus ? "SUPER BONUS ×3" : "ĐÁ → BONUS SPIN"} 🎡 · ĐANG QUAY`
-    : game.lastBonus
-      ? `${game.lastBonus.superBonus ? "JACKPOT ×3" : "BONUS"}: +${bonusLabel(game.lastBonus)}`
-      : "VÒNG ĐÁ: XU / ĐÁ / ĐIỂM · 6 ĐÁ → ×3";
-  $("wheel-status").textContent = game.flights.length
-    ? "TOKEN → VÒNG QUAY"
-    : game.pendingCoins
-      ? `ĐANG THẢ ${game.pendingCoins} XU`
-      : game.lastWheel
-        ? `Ô VỪA TRÚNG: ${game.lastWheel} XU`
-        : `Ô ĐANG QUA: ${wheelAward(game.wheel)} XU`;
+  $("bonus").textContent =
+    game.phase === "over"
+      ? "HẾT CREDIT · THƯỞNG ĐÃ DỪNG"
+      : game.spin
+        ? `${game.spin.reward.superBonus ? "SUPER BONUS ×3" : "ĐÁ → BONUS SPIN"} 🎡 · ĐANG QUAY`
+        : game.lastBonus
+          ? `${game.lastBonus.superBonus ? "JACKPOT ×3" : "BONUS"}: +${bonusLabel(game.lastBonus)}`
+          : "VÒNG ĐÁ: XU / ĐÁ / ĐIỂM · 6 ĐÁ → ×3";
+  $("wheel-status").textContent =
+    game.phase === "over"
+      ? "VÁN ĐÃ KẾT THÚC"
+      : game.flights.length
+        ? "TOKEN → VÒNG QUAY"
+        : game.pendingCoins
+          ? `ĐANG THẢ ${game.pendingCoins} XU`
+          : game.lastWheel
+            ? `Ô VỪA TRÚNG: ${game.lastWheel} XU`
+            : `Ô ĐANG QUA: ${wheelAward(game.wheel)} XU`;
   $("stone-progress").textContent =
     `${game.frontCoins % STONE_THRESHOLD}/${STONE_THRESHOLD} ĐIỂM TỪ XU → ĐÁ MỚI`;
   $("tip").textContent = game.message;
@@ -524,9 +532,11 @@ function frame(now) {
     game.tokens <= 0 ||
     game.pieces.length >= MAX_PIECES ||
     game.pendingCoins > 60;
-  if (game.pieces.length >= MAX_PIECES)
+  if (game.phase === "playing" && game.pieces.length >= MAX_PIECES)
     $("tip").textContent =
       "Bàn xu đang đầy. Chờ bàn đẩy dồn xu xuống rồi bắn tiếp.";
+  if (game.phase === "over")
+    $("tip").textContent = "Hết credit. Bàn đẩy và phần thưởng đã dừng.";
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }

@@ -9,6 +9,10 @@ import {
   channelIndex,
   CHANNELS,
   BONUS_REWARDS,
+  MAX_PIECES,
+  SMALL_RADIUS,
+  BIG_RADIUS,
+  PLINKO_RADIUS,
 } from "../src/game.js";
 function fresh(random = () => 0.14) {
   const g = createGame(random, false);
@@ -21,12 +25,22 @@ function advance(g, seconds) {
 function fall(g, kind = "small", x = 0, z = 2.9) {
   return addBall(g, kind, x, -0.6, z);
 }
-test("new round has 50 credits, a varied dense pile and both ball sizes", () => {
+test("new round has fewer larger balls, 50 credits and a lower body cap", () => {
   const g = createGame(() => 0.5);
   assert.equal(g.tokens, 50);
   assert.equal(g.phase, "ready");
-  assert.ok(g.pieces.filter((p) => p.kind === "small").length >= 160);
-  assert.equal(g.pieces.filter((p) => p.kind === "big").length, 7);
+  assert.ok(g.pieces.filter((p) => p.kind === "small").length >= 100);
+  assert.ok(g.pieces.filter((p) => p.kind === "small").length <= 110);
+  assert.equal(MAX_PIECES, 180);
+  assert.equal(SMALL_RADIUS, 0.2);
+  assert.equal(BIG_RADIUS, 0.38);
+  assert.equal(PLINKO_RADIUS, 0.13);
+  for (const p of g.pieces)
+    assert.equal(
+      p.body.shapes[0].radius,
+      p.kind === "small" ? SMALL_RADIUS : BIG_RADIUS,
+    );
+  assert.ok([3, 4].includes(g.pieces.filter((p) => p.kind === "big").length));
   assert.ok(g.pieces.some((p) => p.body.position.y > 0.6));
 });
 test("one press spends one credit; cooldown, zero credits and ready reject extra shots", () => {
@@ -78,7 +92,7 @@ test("three keys open a chest once and repeat without refilling credits", () => 
   assert.equal(g.chests, 2);
   assert.equal(g.score, 400);
   assert.equal(g.tokens, 44);
-  assert.equal(g.pendingBig + g.generatedBig, 4);
+  assert.equal(g.pendingBig + g.generatedBig, 2);
 });
 test("front small balls score once; side drops award nothing", () => {
   const g = fresh();
@@ -132,7 +146,7 @@ test("six big balls queue six spins plus triple jackpot, including repeated sets
 });
 test("piece cap preserves payout queues and rejects new shots", () => {
   const g = fresh();
-  for (let i = 0; i < 360; i++) addBall(g, "small", 0, 0.2, 0);
+  for (let i = 0; i < MAX_PIECES; i++) addBall(g, "small", 0, 0.2, 0);
   g.pendingSmall = 8;
   g.rewards.push({ kind: "small", remaining: 8, aim: 0 });
   assert.equal(shoot(g), false);
@@ -151,9 +165,8 @@ test("real Plinko balls traverse pegs and finish within eight seconds", () => {
     assert.equal(g.tokens, 49);
   }
 });
-test("pause freezes both worlds and bonus; last credit waits for pending work", () => {
+test("pause freezes both worlds; last credit ends without waiting for ball chains", () => {
   const g = fresh();
-  g.tokens = 1;
   shoot(g);
   g.phase = "ready";
   const y = g.plinkoBalls[0].body.position.y;
@@ -161,11 +174,33 @@ test("pause freezes both worlds and bonus; last credit waits for pending work", 
   assert.equal(g.time, 0);
   assert.equal(g.plinkoBalls[0].body.position.y, y);
   g.phase = "playing";
-  advance(g, 3);
-  assert.equal(g.phase, "playing");
-  advance(g, 30);
+  g.cooldown = 0;
+  g.tokens = 1;
+  g.pendingBig = 1;
+  g.rewards.push({ kind: "big", remaining: 1, aim: 0 });
+  g.bonuses.push(false);
+  assert.ok(shoot(g));
   assert.equal(g.phase, "over");
+  assert.equal(g.tokens, 0);
+  const before = { time: g.time, score: g.score, pieces: g.pieces.length };
+  advance(g, 30);
+  assert.deepEqual(
+    { time: g.time, score: g.score, pieces: g.pieces.length },
+    before,
+  );
+  assert.equal(shoot(g), false);
   assert.equal(createGame(() => 0.5, false).tokens, 50);
+});
+test("zero credits stop pending Plinko and bonus dispensing immediately", () => {
+  const g = fresh();
+  shoot(g);
+  g.tokens = 0;
+  g.pendingBig = 1;
+  g.rewards.push({ kind: "big", remaining: 1, aim: 0 });
+  step(g, 1 / 60);
+  assert.equal(g.phase, "over");
+  assert.equal(g.generatedBig, 0);
+  assert.equal(g.time, 0);
 });
 test("table walls contain moving balls and shelf never opens a rear gap", () => {
   const g = fresh();
@@ -186,7 +221,7 @@ test("upper shelf carries balls, then retracts to transfer them onto lower tray"
   const g = fresh();
   g.time = 1.9;
   g.pusher.position.z = -1.5;
-  const ball = addBall(g, "small", 0, 0.745, -0.3);
+  const ball = addBall(g, "small", 0, 0.805, -0.3);
   advance(g, 0.1);
   assert.ok(ball.body.position.y > 0.6);
   advance(g, 1.8);

@@ -108,7 +108,6 @@ export function createGame(random = Math.random, populated = true) {
     time: 0,
     wheel: 0,
     cooldown: 0,
-    grace: 0,
     collected: 0,
     bonuses: [],
     spin: null,
@@ -190,9 +189,9 @@ export function shoot(game) {
   )
     return false;
   game.tokens--;
+  if (game.tokens === 0) game.phase = "over";
   game.shots++;
   game.cooldown = SHOT_DELAY;
-  game.grace = 0;
   game.flights.push({ id: game.nextFlight++, age: 0, aim: game.aim });
   game.message =
     "Xu đang đi qua vòng quay… ô trúng quyết định số xu rơi lên bàn đẩy.";
@@ -207,7 +206,6 @@ function collect(game, piece, front) {
   if (piece.kind === "coin") {
     game.score++;
     game.frontCoins++;
-    game.grace = 0;
     if (game.frontCoins % STONE_THRESHOLD === 0) {
       game.pendingStones++;
       game.message =
@@ -257,6 +255,10 @@ function dispense(game, dt) {
 }
 export function step(game, dt) {
   if (game.phase !== "playing" || dt <= 0) return;
+  if (game.tokens <= 0) {
+    game.phase = "over";
+    return;
+  }
   game.time += dt;
   game.cooldown = Math.max(0, game.cooldown - dt);
   game.wheel = game.time * 1.25;
@@ -318,19 +320,8 @@ export function step(game, dt) {
       } else if (reward.kind === "stones") game.pendingStones += reward.amount;
       else game.score += reward.amount;
       game.lastBonus = reward;
-      game.grace = 0;
       game.message = `${reward.superBonus ? "SUPER BONUS / JACKPOT ×3" : "Bonus Spin"}: +${bonusLabel(reward)}! Credit không tăng.`;
       game.spin = null;
     }
   }
-  const pending =
-    game.spin ||
-    game.bonuses.length ||
-    game.flights.length ||
-    game.pendingCoins ||
-    game.pendingStones;
-  if (game.tokens === 0 && !pending) {
-    game.grace += dt;
-    if (game.grace >= 8) game.phase = "over";
-  } else game.grace = 0;
 }

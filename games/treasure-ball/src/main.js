@@ -6,6 +6,9 @@ import {
   step,
   setAim,
   MAX_PIECES,
+  SMALL_RADIUS,
+  BIG_RADIUS,
+  PLINKO_RADIUS,
   CHANNELS,
   BONUS_REWARDS,
   rewardLabel,
@@ -28,7 +31,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color("#c7c1d3");
 const camera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 60);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 $("world").appendChild(renderer.domElement);
@@ -36,7 +39,7 @@ scene.add(new THREE.HemisphereLight("#fff5dc", "#6b587e", 2.8));
 const sun = new THREE.DirectionalLight("#fff3ce", 3);
 sun.position.set(-4, 9, 5);
 sun.castShadow = true;
-sun.shadow.mapSize.set(1024, 1024);
+sun.shadow.mapSize.set(512, 512);
 Object.assign(sun.shadow.camera, { left: -7, right: 7, top: 7, bottom: -7 });
 scene.add(sun);
 const materials = new Map();
@@ -164,8 +167,8 @@ CHANNELS.forEach((reward, i) => {
   scene.add(sprite);
 });
 const launcher = box("#e4bc72", [0.27, 0.16, 0.25], [0, 4.52, -2.55]);
-const smallGeometry = new THREE.SphereGeometry(0.14, 12, 8),
-  bigGeometry = new THREE.SphereGeometry(0.28, 16, 12);
+const smallGeometry = new THREE.SphereGeometry(SMALL_RADIUS, 12, 8),
+  bigGeometry = new THREE.SphereGeometry(BIG_RADIUS, 16, 12);
 const smallBalls = new THREE.InstancedMesh(
   smallGeometry,
   mat("#fff8e6"),
@@ -184,7 +187,7 @@ for (const mesh of [smallBalls, bigBalls]) {
   scene.add(mesh);
 }
 const dropViews = new Map(),
-  dropGeometry = new THREE.SphereGeometry(0.1, 12, 8),
+  dropGeometry = new THREE.SphereGeometry(PLINKO_RADIUS, 12, 8),
   transform = new THREE.Object3D();
 // Gold balls use a distinct wheel on the right side of the cabinet.
 box("#574568", [1.95, 2.45, 0.2], [3.35, 3.2, -2.82]);
@@ -297,7 +300,9 @@ function togglePause() {
   document.activeElement?.blur();
 }
 function fire() {
-  if (!paused && shoot(game)) tone(320);
+  if (paused || !shoot(game)) return;
+  tone(320);
+  if (game.phase === "over") finish();
 }
 function finish() {
   best = Math.max(best, game.score);
@@ -309,7 +314,7 @@ function finish() {
   clearInput();
   card(
     "HẾT CREDIT",
-    "Một ván thật đã.",
+    "Game over.",
     `${game.score} điểm · ${game.frontBig} bóng lớn · ${game.chests} rương · ${game.shots} bóng đã thả. Chọn vị trí trên bảng đinh và căn nhịp bàn đẩy.`,
     "Chơi ván mới →",
   );
@@ -432,16 +437,22 @@ function frame(now) {
     `BÓNG LỚN ${game.frontBig} · BỘ ${game.frontBig % 6}/6`;
   $("key-progress").textContent =
     `CHÌA ${game.keys % 3}/3 · RƯƠNG ${game.chests}`;
-  $("bonus").textContent = game.spin
-    ? `${game.spin.reward.superBonus ? "SUPER BONUS ×3" : "BONUS"} · ĐANG QUAY 🎡`
-    : game.lastBonus
-      ? `THƯỞNG: +${rewardLabel(game.lastBonus)}`
-      : "BÓNG LỚN RƠI → VÒNG THƯỞNG";
-  $("wheel-status").textContent = game.plinkoBalls.length
-    ? `${game.plinkoBalls.length} BÓNG QUA ĐINH`
-    : game.lastChannel >= 0
-      ? `Ô TRÚNG: ${rewardLabel(CHANNELS[game.lastChannel])}`
-      : "PLINKO → BÀN ĐẨY";
+  $("bonus").textContent =
+    game.phase === "over"
+      ? "HẾT CREDIT · THƯỞNG ĐÃ DỪNG"
+      : game.spin
+        ? `${game.spin.reward.superBonus ? "SUPER BONUS ×3" : "BONUS"} · ĐANG QUAY 🎡`
+        : game.lastBonus
+          ? `THƯỞNG: +${rewardLabel(game.lastBonus)}`
+          : "BÓNG LỚN RƠI → VÒNG THƯỞNG";
+  $("wheel-status").textContent =
+    game.phase === "over"
+      ? "VÁN ĐÃ KẾT THÚC"
+      : game.plinkoBalls.length
+        ? `${game.plinkoBalls.length} BÓNG QUA ĐINH`
+        : game.lastChannel >= 0
+          ? `Ô TRÚNG: ${rewardLabel(CHANNELS[game.lastChannel])}`
+          : "PLINKO → BÀN ĐẨY";
   $("tip").textContent = game.message;
   $("aim-value").textContent =
     Math.abs(game.aim) < 0.15
@@ -456,8 +467,10 @@ function frame(now) {
     game.pieces.length >= MAX_PIECES ||
     game.pendingSmall + game.pendingBig > 70 ||
     game.plinkoBalls.length >= 6;
-  if (game.pieces.length >= MAX_PIECES)
+  if (game.phase === "playing" && game.pieces.length >= MAX_PIECES)
     $("tip").textContent = "Bàn đang đầy. Chờ bóng rơi xuống mép rồi thả tiếp.";
+  if (game.phase === "over")
+    $("tip").textContent = "Hết credit. Bàn đẩy và phần thưởng đã dừng.";
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }

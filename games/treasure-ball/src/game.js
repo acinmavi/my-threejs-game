@@ -1,23 +1,26 @@
 import * as CANNON from "cannon-es";
-export const MAX_PIECES = 360;
+export const MAX_PIECES = 180;
+export const SMALL_RADIUS = 0.2;
+export const BIG_RADIUS = 0.38;
+export const PLINKO_RADIUS = 0.13;
 export const FRONT = 2.55;
 export const CHANNELS = [
   { kind: "big", amount: 1 },
-  { kind: "small", amount: 8 },
+  { kind: "small", amount: 4 },
   { kind: "points", amount: 25 },
   { kind: "key", amount: 1 },
   { kind: "none", amount: 0 },
-  { kind: "big", amount: 2 },
-  { kind: "small", amount: 12 },
+  { kind: "big", amount: 1 },
+  { kind: "small", amount: 6 },
 ];
 export const BONUS_REWARDS = [
-  { kind: "small", amount: 12 },
+  { kind: "small", amount: 6 },
   { kind: "points", amount: 100 },
   { kind: "big", amount: 1 },
-  { kind: "small", amount: 20 },
+  { kind: "small", amount: 10 },
   { kind: "points", amount: 200 },
-  { kind: "big", amount: 2 },
-  { kind: "small", amount: 30 },
+  { kind: "big", amount: 1 },
+  { kind: "small", amount: 15 },
   { kind: "points", amount: 500 },
 ];
 export function rewardLabel(reward) {
@@ -42,7 +45,7 @@ export function addBall(game, kind, x, y, z) {
   const body = new CANNON.Body({
     mass: kind === "small" ? 1 : 3,
     material: game.material,
-    shape: new CANNON.Sphere(kind === "small" ? 0.14 : 0.28),
+    shape: new CANNON.Sphere(kind === "small" ? SMALL_RADIUS : BIG_RADIUS),
   });
   body.position.set(x, y, z);
   body.linearDamping = 0.42;
@@ -102,7 +105,7 @@ export function createGame(random = Math.random, populated = true) {
   const pegs = [];
   for (let row = 0; row < 7; row++)
     for (let col = 0; col < (row % 2 ? 8 : 7); col++) {
-      const x = (col - (row % 2 ? 3.5 : 3)) * 0.55,
+      const x = (col - (row % 2 ? 3.5 : 3)) * 0.5,
         y = 4.03 - row * 0.36;
       const peg = new CANNON.Body({
         mass: 0,
@@ -133,7 +136,6 @@ export function createGame(random = Math.random, populated = true) {
     aim: 0,
     time: 0,
     cooldown: 0,
-    grace: 0,
     lost: 0,
     pendingSmall: 0,
     pendingBig: 0,
@@ -152,27 +154,34 @@ export function createGame(random = Math.random, populated = true) {
     message: "Căn vị trí rồi thả bóng qua bảng đinh. Bóng lớn mở vòng thưởng.",
   };
   if (populated) {
-    for (let row = 0; row < 10; row++)
-      for (let col = 0; col < 15; col++)
+    for (let row = 0; row < 7; row++)
+      for (let col = 0; col < 10; col++)
         addBall(
           game,
           "small",
-          (col - 7) * 0.3 + (random() - 0.5) * 0.02,
-          0.145,
-          -0.7 + row * 0.35,
+          (col - 4.5) * 0.44 + (random() - 0.5) * 0.02,
+          SMALL_RADIUS + 0.005,
+          -0.18 + row * 0.44,
         );
-    for (let row = 0; row < 4; row++)
-      for (let col = 0; col < 15; col++)
-        addBall(game, "small", (col - 7) * 0.3, 0.75, -2.5 + row * 0.35);
-    for (let i = 0; i < Math.floor(random() * 21); i++)
+    for (let row = 0; row < 3; row++)
+      for (let col = 0; col < 10; col++)
+        addBall(
+          game,
+          "small",
+          (col - 4.5) * 0.44,
+          0.6 + SMALL_RADIUS + 0.005,
+          -2.48 + row * 0.45,
+        );
+    for (let i = 0; i < Math.floor(random() * 11); i++)
       addBall(game, "small", (random() - 0.5) * 4, 0.45, random() * 2.4);
-    for (let i = 0; i < 7; i++)
+    const initialBig = 3 + Math.floor(random() * 2);
+    for (let i = 0; i < initialBig; i++)
       addBall(
         game,
         "big",
-        ((i % 3) - 1) * 1.35 + (random() - 0.5) * 0.2,
-        0.48,
-        0.55 + Math.floor(i / 3) * 0.85,
+        ((i % 2) - 0.5) * 2.4 + (random() - 0.5) * 0.2,
+        0.75,
+        0.7 + Math.floor(i / 2) * 1.3,
       );
     for (let i = 0; i < 40; i++) world.step(1 / 60);
   }
@@ -194,7 +203,7 @@ export function shoot(game) {
   const body = new CANNON.Body({
     mass: 1,
     material: game.pegMaterial,
-    shape: new CANNON.Sphere(0.1),
+    shape: new CANNON.Sphere(PLINKO_RADIUS),
   });
   body.position.set(game.aim, 4.52, 0);
   body.linearFactor.set(1, 1, 0);
@@ -204,9 +213,9 @@ export function shoot(game) {
   game.plinkoWorld.addBody(body);
   game.plinkoBalls.push({ id: game.nextId++, body, age: 0, aim: game.aim });
   game.tokens--;
+  if (game.tokens === 0) game.phase = "over";
   game.shots++;
   game.cooldown = 0.65;
-  game.grace = 0;
   game.message = "Bóng đang qua bảng đinh… chờ ô thưởng bên dưới.";
   return true;
 }
@@ -229,8 +238,8 @@ function resolveChannel(game, ball) {
     if (game.keys % 3 === 0) {
       game.chests++;
       game.score += 200;
-      queueBalls(game, "big", 2);
-      game.message = "MỞ RƯƠNG! +200 điểm và 2 bóng lớn xuống bàn.";
+      queueBalls(game, "big", 1);
+      game.message = "MỞ RƯƠNG! +200 điểm và 1 bóng lớn xuống bàn.";
       return;
     }
   }
@@ -242,7 +251,6 @@ function collect(game, piece) {
     game.lost++;
     return;
   }
-  game.grace = 0;
   if (piece.kind === "small") {
     game.frontSmall++;
     game.score += 2;
@@ -311,12 +319,15 @@ function spinBonus(game, dt) {
     else queueBalls(game, reward.kind, reward.amount);
     game.lastBonus = reward;
     game.spin = null;
-    game.grace = 0;
     game.message = `${reward.superBonus ? "SUPER BONUS ×3" : reward.amount === 500 ? "JACKPOT" : "Bonus"}: +${rewardLabel(reward)}!`;
   }
 }
 export function step(game, dt) {
   if (game.phase !== "playing" || dt <= 0) return;
+  if (game.tokens <= 0) {
+    game.phase = "over";
+    return;
+  }
   game.time += dt;
   game.cooldown = Math.max(0, game.cooldown - dt);
   game.plinkoWorld.step(dt);
@@ -346,14 +357,4 @@ export function step(game, dt) {
     }
   }
   spinBonus(game, dt);
-  const pending =
-    game.plinkoBalls.length ||
-    game.pendingSmall ||
-    game.pendingBig ||
-    game.spin ||
-    game.bonuses.length;
-  if (game.tokens === 0 && !pending) {
-    game.grace += dt;
-    if (game.grace >= 10) game.phase = "over";
-  } else game.grace = 0;
 }

@@ -12,7 +12,7 @@ Starting board: 156–180 randomized coins, including a prefilled upper shelf, p
 
 Every front stone counts regardless of color: +20 points and a separate Bonus Spin awarding physical coins, stones, or points. Every sixth stone additionally awards +100 points and a Super Bonus / Jackpot spin with triple payouts. Duplicate colors and subsequent sets of six work identically.
 
-P pauses physics, flights, dispensing and bonus timers. Esc confirms Home; cancel preserves pause state. When credits run out, finish pending flights, reward rain, stones and bonus spins, then allow eight seconds for physical settling before ending. Best score remains browser-local.
+P pauses physics, flights, dispensing and bonus timers. Esc confirms Home; cancel preserves pause state. When credits reach zero, the round ends immediately: physics, flights, dispensing and bonus spins freeze. No pending reward extends the round. Best score remains browser-local.
 
 Fixed 60 Hz rigid-body physics, SAP broadphase, sleeping bodies, reduced contact friction equations, 260-piece cap and instanced coin rendering. Exact queued payouts wait for capacity rather than disappearing. Shelf friction is calibrated for visible two-tier transfer in this simplified browser model; no cloth/card simulation. Rendering uses a maximum 1.5 pixel ratio and 512-pixel shadow map.
 

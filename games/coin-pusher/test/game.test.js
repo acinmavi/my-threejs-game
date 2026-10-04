@@ -176,25 +176,33 @@ test("any six stones queue six spins and a triple Super Bonus; side loss does no
   assert.equal(g.spin, null);
   assert.equal(g.bonuses.length, 0);
 });
-test("last credit waits for in-flight token, reward rain, bonuses and settling grace", () => {
+test("last credit ends immediately even with queued rain and bonus spins", () => {
   const g = fresh();
   g.tokens = 1;
-  shoot(g);
-  advance(g, 0.5);
-  assert.equal(g.phase, "playing");
-  assert.equal(g.grace, 0);
-  advance(g, 6);
-  assert.equal(g.phase, "playing");
-  fall(g);
-  step(g, 1 / 60);
+  g.pendingCoins = 12;
+  g.rewards.push({ remaining: 12, aim: 0 });
+  g.pendingStones = 2;
+  g.bonuses.push(false);
+  assert.ok(shoot(g));
   assert.equal(g.tokens, 0);
-  assert.ok(g.grace < 0.02);
-  advance(g, 8.1);
   assert.equal(g.phase, "over");
-  const t = g.time;
-  step(g, 1);
-  assert.equal(g.time, t);
+  const before = { time: g.time, score: g.score, pieces: g.pieces.length };
+  advance(g, 20);
+  assert.deepEqual(
+    { time: g.time, score: g.score, pieces: g.pieces.length },
+    before,
+  );
+  assert.equal(shoot(g), false);
   assert.equal(fresh().tokens, 50);
+});
+test("zero credits stop an already running pusher before pending rewards resolve", () => {
+  const g = fresh();
+  g.tokens = 0;
+  g.pendingStones = 1;
+  step(g, 1 / 60);
+  assert.equal(g.phase, "over");
+  assert.equal(g.generatedStones, 0);
+  assert.equal(g.time, 0);
 });
 test("upper shelf supports physical tokens and its retreat drops them to lower level", () => {
   const g = fresh();
