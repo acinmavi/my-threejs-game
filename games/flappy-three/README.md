@@ -32,3 +32,7 @@ rtk npm run build
 Physics runs at a fixed 120 Hz. The tests cover starting, gravity, pipe collisions, one-time scoring, frozen game-over state and frame-rate consistency.
 
 In the Sky Club collection, Escape and Home open an exit confirmation. Cancel resumes the prior play/pause state.
+
+## Language
+
+English is the default. Use the language selector in the header to switch to Vietnamese. Your choice is saved across the Sky Club collection. Changing language reloads the game and starts a fresh round.

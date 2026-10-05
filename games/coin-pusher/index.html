@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -11,53 +11,42 @@
       <header>
         <a class="brand" href="/"
           ><span>✦</span> SKY CLUB <small>ARCADE / 005</small></a
-        ><button id="sound" aria-label="Bật âm thanh" aria-pressed="false">
-          ♪ Âm thanh: tắt
-        </button>
+        ><button id="sound" aria-label="Enable sound" aria-pressed="false">♪ Sound: off</button>
       </header>
       <section class="intro">
         <div>
-          <div class="eyebrow">MỘT ĐỒNG XU. CẢ MỘT DÂY CHUYỀN.</div>
+          <div class="eyebrow">ONE COIN. A WHOLE CHAIN REACTION.</div>
           <h1>Infinity <em>Pusher</em><i>↗</i></h1>
-          <p>Căn nhịp bắn. Đẩy xu và đá về phía bạn.</p>
+          <p>Time your shots. Push coins and stones toward you.</p>
         </div>
         <div class="record">
-          <span>KỶ LỤC ĐIỂM</span><strong id="best">00</strong>
+          <span>BEST SCORE</span><strong id="best">00</strong>
         </div>
       </section>
-      <section class="game-frame" aria-label="Máy đẩy xu 3D">
+      <section class="game-frame" aria-label="3D coin pusher">
         <div id="world"></div>
         <div class="hud">
-          <span id="tokens">50 CREDIT</span><span id="score">0 ĐIỂM</span
-          ><span id="wheel-status">TARGET WHEEL · 1–15 XU</span
-          ><button id="pause" aria-label="Tạm dừng" disabled>Ⅱ</button>
+          <span id="tokens">50 CREDITS</span><span id="score">0 POINTS</span
+          ><span id="wheel-status">TARGET WHEEL · 1–15 COINS</span
+          ><button id="pause" aria-label="Pause" disabled>Ⅱ</button>
         </div>
-        <div class="stones" aria-label="Đá đã thu thập">
-          <span id="stone-label">ĐÁ 0 · BỘ 0/6</span>
+        <div class="stones" aria-label="Collected stones">
+          <span id="stone-label">STONES 0 · SET 0/6</span>
           <div id="stone-list"></div>
-          <span id="stone-progress">0/50 ĐIỂM TỪ XU → ĐÁ MỚI</span>
-          <b id="bonus">6 ĐÁ BẤT KỲ → SUPER BONUS</b>
+          <span id="stone-progress">0/50 COIN POINTS → NEW STONE</span>
+          <b id="bonus">ANY 6 STONES → SUPER BONUS</b>
         </div>
         <div id="overlay">
-          <span id="card-label">50 CREDIT · ĐÁ NÀO CŨNG TÍNH</span>
-          <h2 id="card-title">Một cú đẩy nữa.</h2>
-          <p id="card-copy">
-            Mỗi lần bấm dùng 1 credit để bắn token qua vòng quay. Trúng ô 15 thì
-            thêm 15 xu rơi lên bàn đẩy trên. Xu trên bàn co/duỗi rơi xuống bàn
-            dưới, dồn xu và đá ra mép. Cứ 50 điểm từ xu cửa trước, máy thả thêm
-            1 đá ngẫu nhiên. Xu rơi chỉ cộng điểm, không hoàn credit. Mỗi đá mở
-            vòng thưởng riêng: xu, đá hoặc điểm; 6 đá bất kỳ mở Super Bonus ×3 /
-            Jackpot. Hết credit là game over ngay.
-          </p>
-          <button id="play">Bắt đầu ván →</button>
+          <span id="card-label">50 CREDITS · EVERY STONE COUNTS</span>
+          <h2 id="card-title">One more push.</h2>
+          <p id="card-copy">Spend 1 credit per shot to fire a token through the wheel. Hit sector 15 to drop 15 extra coins onto the upper shelf. Coins fall from the moving shelf onto the lower table, pushing coins and stones toward the ledge. Every 50 front-coin points releases 1 random stone. Collected coins award points only; credits never refill. Each stone opens a separate bonus wheel for coins, stones or points. Any 6 stones unlock Super Bonus ×3 / Jackpot. Zero credits ends the round immediately.</p>
+          <button id="play">Start round →</button>
         </div>
-        <div id="tip" aria-live="polite">
-          Căn nhịp bàn đẩy. Bắn gần giữa để tránh khe hai bên.
-        </div>
+        <div id="tip" aria-live="polite">Time the pusher. Fire near the center to avoid side gaps.</div>
       </section>
       <div class="controls">
         <label class="aim-control" for="aim"
-          ><span>VỊ TRÍ BẮN <b id="aim-value">GIỮA</b></span
+          ><span>SHOT POSITION <b id="aim-value">CENTER</b></span
           ><input
             id="aim"
             type="range"
@@ -66,14 +55,13 @@
             step="0.05"
             value="0"
             disabled
-          /><small>← → / A D · TRÁI — GIỮA — PHẢI</small></label
-        ><button id="fire" disabled>
-          BẮN XU <small>SPACE · 1 CREDIT / LẦN</small>
+          /><small>← → / A D · LEFT — CENTER — RIGHT</small></label
+        ><button id="fire" disabled>FIRE COIN <small>SPACE · 1 CREDIT / SHOT</small>
         </button>
       </div>
       <footer>
-        <span>50 điểm từ xu → 1 đá · Đá rơi → Bonus Spin · 6 đá → Jackpot</span
-        ><span>P tạm dừng · Esc về Home</span>
+        <span>50 coin points → 1 stone · Stone collected → Bonus Spin · 6 stones → Jackpot</span
+        ><span>P pause · Esc return Home</span>
       </footer>
     </main>
     <script type="module" src="./src/main.js"></script>

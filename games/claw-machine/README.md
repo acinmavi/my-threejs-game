@@ -1,7 +1,7 @@
 # Claw Club
 
-Máy gắp gấu 3D, 3 lượt mỗi ván, 20 giây căn mỗi lượt. Giữ WASD / phím mũi tên / nút chạm để di chuyển, Space / Gắp gấu để hạ càng. Đổi góc nhìn trái/phải để chỉnh chiều sâu. P tạm dừng; Esc xác nhận về Home.
+A 3D claw machine with three attempts per round and 20 seconds to aim each attempt. Hold WASD / arrow keys / touch buttons to move; press Space or Grab Bear to lower the claw. Switch between left and right views to judge depth. P pauses; Esc opens the Home confirmation.
 
-Độ khó dựa trên độ lệch khỏi tâm, trọng lượng, góc nghiêng và gấu gần nhau. Kẹp yếu sẽ tuột khi nâng hoặc di chuyển; không tung xúc xắc quyết định thắng/thua. Gấu chịu trọng lực, va sàn và nảy nhẹ. Chỉ tính điểm khi gấu rơi vào cửa nhận; kỷ lục mỗi ván lưu trên trình duyệt. Đây là mô hình vật lý giản lược, không mô phỏng đầy đủ vải mềm hay va chạm giữa các chi của gấu.
+Difficulty depends on distance from the bear’s center, weight, tilt, and nearby bears. A weak grip slips during lifting or travel; outcomes do not use a random win/loss roll. Bears respond to gravity, hit the floor, and bounce slightly. Points count only when a bear falls into the delivery chute. Your best round is saved in the browser. Physics are simplified and do not fully simulate soft fabric or collisions between a bear’s limbs.
 
-Chạy từ root bằng npm run dev.
+Run `npm run dev` from the Sky Club root directory. The UI defaults to English. Use the language selector for Vietnamese; changing language starts a new round and saves your preference.

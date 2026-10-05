@@ -1,38 +1,41 @@
 # Sky Club
 
-Three.js arcade collection: Flappy 3D, Crossy 3D, Pop the Lock Claw Club and Infinity Pusher. Both games' Git histories are preserved through subtree imports.
+Six browser arcade games built with Three.js. Play at [tit-moon2026.vercel.app](https://tit-moon2026.vercel.app/).
 
-## Run
+## Run locally
 
 ```sh
-rtk npm install
-rtk npm run dev
+npm install
+npm run dev
 ```
 
-Open http://127.0.0.1:5175/. Home lists the games and their browser-local best scores.
+Open http://127.0.0.1:5175/. Home lists all games and browser-local best scores.
 
-- `/`: game selection.
-- `/games/flappy-three/`: Flappy 3D with progressive speed and pipe difficulty.
-- `/games/crossy-three/`: Crossy 3D with camera pressure, widening roads, variable traffic, rivers and trains.
+## Games
 
-Escape, the Home button and the Sky Club logo open a confirmation dialog. Active games pause while it is open. Cancel restores the previous play/pause state; confirming navigates to Home and ends the current run. P still pauses normally. Best scores remain stored locally for each site origin.
+- **Flappy 3D** (`/games/flappy-three/`): flap through pipes as speed and difficulty increase. Space, click or tap.
+- **Crossy 3D** (`/games/crossy-three/`): dodge traffic, cross rivers and wait for trains while the camera pushes you forward. Five difficulties. WASD, arrow keys or swipe.
+- **Pop the Lock** (`/games/pop-the-lock/`): hit the target and reverse direction. Endless is the default; level-based play is also available. Space, click or tap.
+- **Claw Club** (`/games/claw-machine/`): a challenging 3D claw machine with three grabs per round and 20 seconds to aim. WASD or touch controls to move; Space to grab.
+- **Infinity Pusher** (`/games/coin-pusher/`): 50 credits per round, a target wheel awarding 1–15 coins, and a two-tier Cannon ES pusher. Every 50 points from collected coins creates a stone. Each stone triggers a Bonus Spin; six stones trigger a Jackpot. A/D, arrows or the slider to aim; Space or tap to shoot.
+- **Treasure Ball** (`/games/treasure-ball/`): a physical Plinko pegboard, white and gold balls, bonus spins and three-key treasure chests. 50 credits per round. A/D or the slider to aim; Space or tap to drop.
+
+Both pusher games end immediately at zero credits, stopping the pusher and pending rewards. Collected pieces award points, not credits.
+
+## Language and navigation
+
+English is the default. Select **Tiếng Việt** in the header to switch to Vietnamese. The choice is saved locally and shared across Home and all games. Changing language reloads the page and starts a new round; saved best scores remain intact.
+
+Escape, the Home button and the Sky Club logo open a confirmation dialog. Active games pause while it is open. Cancel restores the previous play/pause state; confirming returns Home and ends the current round. P toggles pause. Scores and settings are stored separately for each site origin.
 
 ## Verify and build
 
 ```sh
-rtk npm test
-rtk npm run build
-rtk npm run preview
+npm test
+npm run build
+npm run preview
 ```
 
-The root Vite build produces Home and all five game pages and shares the Three.js bundle between games. Deploy `dist/` as a static site, or deploy this repository using the included Vercel configuration. No server or database is required.
+Vite builds Home and all six game pages, sharing the Three.js bundle. Deploy `dist/` as a static site, or deploy this repository with the included Vercel configuration. No server or database is required.
 
-The original standalone checkouts were moved from `Documents/Working` to `.archive/` as local recovery copies; `.archive/` is ignored by Git and excluded from deployment. Active source is under `games/`.
-
-Pop the Lock: `/games/pop-the-lock/` — bấm đúng nhịp, đổi chiều sau mỗi lần trúng; mặc định Endless, có thể chọn Theo màn; Space/click/chạm, P pause, Esc về Home.
-
-Claw Club: `/games/claw-machine/` — máy gắp gấu 3D, 3 lượt/ván, 20 giây căn; WASD/nút chạm di chuyển, Space gắp, P pause, Esc Home.
-
-Infinity Pusher: `/games/coin-pusher/` — 50 credit/ván, vòng quay thưởng 1–15 xu, bàn đẩy hai tầng với vật lý Cannon ES; mỗi 50 điểm từ xu cửa trước sinh đá, mỗi đá mở Bonus Spin, 6 đá bất kỳ mở Jackpot. A D/mũi tên/thanh trượt căn vị trí, Space/nút chạm bắn (1 xu mỗi lần), P pause, Esc Home.
-
-Treasure Ball: `/games/treasure-ball/` — bảng đinh Plinko vật lý, bóng trắng/vàng trên bàn đẩy hai tầng, vòng bonus và rương 3 chìa. 50 credit/ván; Space thả, A/D căn, P pause, Esc Home.
+Active game source lives under `games/`. The original Flappy and Crossy histories were preserved through subtree imports. Archived standalone recovery copies are ignored by Git and excluded from deployment.

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -11,51 +11,41 @@
       <header>
         <a class="brand" href="/"
           ><span>✦</span> SKY CLUB <small>ARCADE / 006</small></a
-        ><button id="sound" aria-label="Bật âm thanh" aria-pressed="false">
-          ♪ Âm thanh: tắt
-        </button>
+        ><button id="sound" aria-label="Enable sound" aria-pressed="false">♪ Sound: off</button>
       </header>
       <section class="intro">
         <div>
-          <div class="eyebrow">MỘT QUẢ BÓNG. MỘT KHO BÁU.</div>
+          <div class="eyebrow">ONE BALL. ONE TREASURE.</div>
           <h1>Treasure <em>Ball</em><i>↗</i></h1>
-          <p>Thả qua bảng đinh. Đẩy bóng vàng. Mở kho báu.</p>
+          <p>Drop through pegs. Push gold balls. Unlock treasure.</p>
         </div>
         <div class="record">
-          <span>KỶ LỤC ĐIỂM</span><strong id="best">00</strong>
+          <span>BEST SCORE</span><strong id="best">00</strong>
         </div>
       </section>
-      <section class="game-frame" aria-label="Máy thả và đẩy bóng 3D">
+      <section class="game-frame" aria-label="3D ball drop and pusher">
         <div id="world"></div>
         <div class="hud">
-          <span id="tokens">50 CREDIT</span><span id="score">0 ĐIỂM</span
-          ><span id="wheel-status">PLINKO → BÀN ĐẨY</span
-          ><button id="pause" aria-label="Tạm dừng" disabled>Ⅱ</button>
+          <span id="tokens">50 CREDITS</span><span id="score">0 POINTS</span
+          ><span id="wheel-status">PLINKO → PUSHER</span
+          ><button id="pause" aria-label="Pause" disabled>Ⅱ</button>
         </div>
-        <div class="stones" aria-label="Tiến độ kho báu">
-          <span id="ball-progress">BÓNG LỚN 0 · BỘ 0/6</span>
-          <span id="key-progress">CHÌA 0/3 · RƯƠNG 0</span>
-          <b id="bonus">BÓNG LỚN RƠI → VÒNG THƯỞNG</b>
+        <div class="stones" aria-label="Treasure progress">
+          <span id="ball-progress">BIG BALLS 0 · SET 0/6</span>
+          <span id="key-progress">KEYS 0/3 · CHESTS 0</span>
+          <b id="bonus">BIG BALL COLLECTED → BONUS WHEEL</b>
         </div>
         <div id="overlay">
-          <span id="card-label">50 CREDIT · SĂN BÓNG VÀNG</span>
-          <h2 id="card-title">Kho báu chờ bạn.</h2>
-          <p id="card-copy">
-            Mỗi lượt dùng 1 credit để thả bóng trắng qua bảng đinh. Ô trúng
-            thưởng bóng nhỏ, bóng lớn, điểm hoặc chìa khóa. Bóng đổ lên bàn đẩy:
-            bóng nhỏ rơi +2 điểm, bóng vàng rơi mở vòng bonus. Đủ 6 bóng vàng có
-            Super Bonus ×3; 3 chìa mở rương. Credit không tự tăng. Hết credit là
-            game over ngay.
-          </p>
-          <button id="play">Bắt đầu ván →</button>
+          <span id="card-label">50 CREDITS · HUNT GOLD BALLS</span>
+          <h2 id="card-title">Treasure awaits.</h2>
+          <p id="card-copy">Spend 1 credit to drop a white ball through the peg board. Channels award small balls, big balls, points or keys. Balls land on the pusher: collected small balls award +2 points, and gold balls open the bonus wheel. Every 6 gold balls unlock Super Bonus ×3; 3 keys open a chest. Credits never refill. Zero credits ends the round immediately.</p>
+          <button id="play">Start round →</button>
         </div>
-        <div id="tip" aria-live="polite">
-          Căn vị trí thả bóng trên bảng đinh.
-        </div>
+        <div id="tip" aria-live="polite">Aim your drop above the peg board.</div>
       </section>
       <div class="controls">
         <label class="aim-control" for="aim"
-          ><span>VỊ TRÍ THẢ <b id="aim-value">GIỮA</b></span
+          ><span>DROP POSITION <b id="aim-value">CENTER</b></span
           ><input
             id="aim"
             type="range"
@@ -64,14 +54,13 @@
             step="0.05"
             value="0"
             disabled
-          /><small>← → / A D · TRÁI — GIỮA — PHẢI</small></label
-        ><button id="fire" disabled>
-          THẢ BÓNG <small>SPACE · 1 CREDIT / LẦN</small>
+          /><small>← → / A D · LEFT — CENTER — RIGHT</small></label
+        ><button id="fire" disabled>DROP BALL <small>SPACE · 1 CREDIT / SHOT</small>
         </button>
       </div>
       <footer>
-        <span>Bóng nhỏ +2 điểm · Bóng vàng → Bonus · 3 chìa → Rương</span
-        ><span>P tạm dừng · Esc về Home</span>
+        <span>Small balls +2 points · Gold balls → Bonus · 3 keys → Chest</span
+        ><span>P pause · Esc return Home</span>
       </footer>
     </main>
     <script type="module" src="./src/main.js"></script>

@@ -1,3 +1,5 @@
+import { t, setupLanguageUI } from '../../../src/i18n.js';
+import { staticPairs } from './translations.js';
 import { setupGameExit } from '../../../src/exit-dialog.js';
 import * as THREE from 'three';
 import './style.css';
@@ -110,7 +112,7 @@ function start() {
   document.activeElement?.blur();
   game = createGame(); paused = false; accumulator = 0; syncPipes();
   $('score').textContent = '0'; $('overlay').hidden = true; $('pause').disabled = false;
-  $('pause').textContent = 'Ⅱ'; $('pause').setAttribute('aria-label', 'Tạm dừng');
+  $('pause').textContent = 'Ⅱ'; $('pause').setAttribute('aria-label', t("Pause", "Tạm dừng"));
   flap(game); tone(650);
 }
 function action() {
@@ -123,8 +125,8 @@ function togglePause() {
   document.activeElement?.blur();
   paused = !paused; accumulator = 0;
   $('pause').textContent = paused ? '▶' : 'Ⅱ';
-  $('pause').setAttribute('aria-label', paused ? 'Tiếp tục' : 'Tạm dừng');
-  if (paused) card('NGHỈ MỘT NHỊP', 'Bầu trời vẫn đợi.', 'Chuyến bay sẽ tiếp tục ngay khi bạn sẵn sàng.', 'Tiếp tục bay', 'P / SPACE ĐỂ TIẾP TỤC');
+  $('pause').setAttribute('aria-label', paused ? t("Resume", "Tiếp tục") : t("Pause", "Tạm dừng"));
+  if (paused) card(t("TAKE A BREATHER", "NGHỈ MỘT NHỊP"), t("The sky can wait.", "Bầu trời vẫn đợi."), t("Your flight resumes when you are ready.", "Chuyến bay sẽ tiếp tục ngay khi bạn sẵn sàng."), t("Resume flying", "Tiếp tục bay"), t("P / SPACE TO RESUME", "P / SPACE ĐỂ TIẾP TỤC"));
   else $('overlay').hidden = true;
 }
 function endRun() {
@@ -133,19 +135,19 @@ function endRun() {
   try { localStorage.setItem('sky-club-best', String(best)); } catch {}
   $('best').textContent = String(best).padStart(2, '0'); $('pause').disabled = true;
   $('flash').classList.remove('hit'); void $('flash').offsetWidth; $('flash').classList.add('hit');
-  card(newBest ? 'KỶ LỤC MỚI!' : 'THÊM MỘT CHUYẾN BAY?', 'Hạ cánh rồi!', `Bạn vượt qua ${game.score} ống. Kỷ lục: ${best}. Thử bay xa hơn nhé.`, 'Bay lần nữa', 'ENTER / NÚT BAY LẦN NỮA ĐỂ CHƠI LẠI');
+  card(newBest ? t("NEW BEST!", "KỶ LỤC MỚI!") : t("ANOTHER FLIGHT?", "THÊM MỘT CHUYẾN BAY?"), t("Touchdown!", "Hạ cánh rồi!"), t(`You cleared ${game.score} pipes. Best: ${best}. Try flying further.`, `Bạn vượt qua ${game.score} ống. Kỷ lục: ${best}. Thử bay xa hơn nhé.`), t("Fly again", "Bay lần nữa"), t("ENTER / FLY AGAIN TO RESTART", "ENTER / NÚT BAY LẦN NỮA ĐỂ CHƠI LẠI"));
 }
 $('play').addEventListener('click', () => paused ? togglePause() : start());
 $('world').addEventListener('pointerdown', event => { event.preventDefault(); action(); });
 $('pause').addEventListener('click', togglePause);
 $('sound').addEventListener('click', () => {
   $('sound').blur();
-  muted = !muted; $('sound').querySelector('span').textContent = `Âm thanh: ${muted ? 'tắt' : 'bật'}`;
+  muted = !muted; $('sound').querySelector('span').textContent = muted ? t('Sound: off', 'Âm thanh: tắt') : t('Sound: on', 'Âm thanh: bật');
   $('sound').setAttribute('aria-pressed', String(!muted));
-  $('sound').setAttribute('aria-label', muted ? 'Bật âm thanh' : 'Tắt âm thanh'); tone(750);
+  $('sound').setAttribute('aria-label', muted ? t("Enable sound", "Bật âm thanh") : t("Mute sound", "Tắt âm thanh")); tone(750);
 });
 window.addEventListener('keydown', event => {
-  if (event.repeat || event.target.closest('button, a, input')) return;
+  if (event.repeat || event.target.closest('button, a, input, select')) return;
   if (event.code === 'Space' || event.code === 'ArrowUp') { event.preventDefault(); action(); }
   if (event.code === 'KeyP') togglePause();
   if (event.code === 'Enter' && game.phase === 'over') start();
@@ -180,3 +182,5 @@ renderer.setAnimationLoop(time => {
 });
 
 setupGameExit({ isPlaying: () => game.phase === 'playing', isPaused: () => paused, togglePause });
+
+setupLanguageUI(staticPairs);

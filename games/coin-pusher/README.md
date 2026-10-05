@@ -16,4 +16,6 @@ P pauses physics, flights, dispensing and bonus timers. Esc confirms Home; cance
 
 Fixed 60 Hz rigid-body physics, SAP broadphase, sleeping bodies, reduced contact friction equations, 260-piece cap and instanced coin rendering. Exact queued payouts wait for capacity rather than disappearing. Shelf friction is calibrated for visible two-tier transfer in this simplified browser model; no cloth/card simulation. Rendering uses a maximum 1.5 pixel ratio and 512-pixel shadow map.
 
-Credit chỉ giảm khi bắn, không tự bổ sung. Xu cửa trước +1 điểm. Mỗi đá mở vòng thưởng riêng (8/15/25 xu trên bàn, 1/2 đá mới, hoặc 50/100/150 điểm). Đủ 6 đá bất kỳ mở thêm Super Bonus ×3. Hai vòng quay độc lập; thưởng vật phẩm được thả lên bàn trên.
+Credits decrease only when firing and never refill. Front coins award +1 point. Each stone opens a separate reward wheel (8/15/25 physical coins, 1/2 new stones, or 50/100/150 points). Any six stones trigger an additional Super Bonus ×3. The two wheels run independently; physical prizes drop onto the upper shelf.
+
+The interface defaults to English. Use the language selector to switch to Vietnamese. The selection persists across Sky Club games; changing language reloads the page and starts a new round.

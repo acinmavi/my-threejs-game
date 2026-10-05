@@ -1,3 +1,5 @@
+import { staticPairs } from "./translations.js";
+import { t, setupLanguageUI } from "../../../src/i18n.js";
 import * as THREE from "three";
 import "./style.css";
 import {
@@ -130,7 +132,7 @@ box("#514060", [4.65, 4.1, 0.2], [0, 2.7, -2.82]);
 box("#dbb475", [4.85, 0.13, 0.27], [0, 4.79, -2.8]);
 for (const x of [-2.27, 2.27])
   box("#b899bd", [0.15, 4.1, 0.24], [x, 2.7, -2.68]);
-label("TREASURE DROP", 0, 4.88, -2.55, 0.32);
+label(t("TREASURE DROP", "THẢ KHO BÁU"), 0, 4.88, -2.55, 0.32);
 const pegGeometry = new THREE.SphereGeometry(0.065, 10, 8);
 for (const peg of game.pegs) {
   const mesh = new THREE.Mesh(pegGeometry, mat("#e1bb79", true));
@@ -152,11 +154,11 @@ CHANNELS.forEach((reward, i) => {
   channelPanels.push(panel);
   panel.material = panel.material.clone();
   const unit = {
-    big: "LỚN",
-    small: "NHỎ",
-    points: "ĐIỂM",
-    key: "CHÌA",
-    none: "TRỐNG",
+    big: t("BIG", "LỚN"),
+    small: t("SMALL", "NHỎ"),
+    points: t("POINTS", "ĐIỂM"),
+    key: t("KEYS", "CHÌA"),
+    none: t("EMPTY", "TRỐNG"),
   }[reward.kind];
   const sprite = badge(
     reward.kind === "key" ? "⚿" : reward.kind === "none" ? "–" : reward.amount,
@@ -191,7 +193,7 @@ const dropViews = new Map(),
   transform = new THREE.Object3D();
 // Gold balls use a distinct wheel on the right side of the cabinet.
 box("#574568", [1.95, 2.45, 0.2], [3.35, 3.2, -2.82]);
-label("GOLD BALL BONUS", 3.35, 4.48, -2.5, 0.22);
+label(t("GOLD BALL BONUS", "THƯỞNG BÓNG VÀNG"), 3.35, 4.48, -2.5, 0.22);
 const wheel = new THREE.Group();
 wheel.position.set(3.35, 3.22, -2.6);
 scene.add(wheel);
@@ -225,7 +227,7 @@ BONUS_REWARDS.forEach((reward, i) => {
   );
   const sprite = badge(
     reward.amount,
-    reward.kind === "small" ? "NHỎ" : reward.kind === "big" ? "LỚN" : "ĐIỂM",
+    reward.kind === "small" ? t("SMALL", "NHỎ") : reward.kind === "big" ? t("BIG", "LỚN") : t("POINTS", "ĐIỂM"),
     0.3,
   );
   sprite.position.set(Math.sin(angle) * 0.56, Math.cos(angle) * 0.56, 0.02);
@@ -240,7 +242,7 @@ pointer.position.set(3.35, 4.16, -2.48);
 scene.add(pointer);
 const chest = box("#b38b48", [1.2, 0.5, 0.55], [3.35, 1.92, -2.53]);
 box("#e5be70", [1.27, 0.13, 0.6], [3.35, 2.22, -2.53]);
-label("3 CHÌA → RƯƠNG", 3.35, 1.48, -2.3, 0.18);
+label(t("3 KEYS → CHEST", "3 CHÌA → RƯƠNG"), 3.35, 1.48, -2.3, 0.18);
 function tone(freq) {
   if (muted) return;
   try {
@@ -278,7 +280,7 @@ function start() {
   $("overlay").hidden = true;
   $("pause").disabled = false;
   $("pause").textContent = "Ⅱ";
-  $("pause").setAttribute("aria-label", "Tạm dừng");
+  $("pause").setAttribute("aria-label", t("Pause", "Tạm dừng"));
   document.activeElement?.blur();
 }
 function togglePause() {
@@ -288,13 +290,13 @@ function togglePause() {
   accumulator = 0;
   clearInput();
   $("pause").textContent = paused ? "▶" : "Ⅱ";
-  $("pause").setAttribute("aria-label", paused ? "Tiếp tục" : "Tạm dừng");
+  $("pause").setAttribute("aria-label", paused ? t("Resume", "Tiếp tục") : t("Pause", "Tạm dừng"));
   if (paused)
     card(
-      "DỪNG MỘT CHÚT",
-      "Bàn đẩy cũng nghỉ.",
-      "Bóng, bảng đinh và vòng thưởng đã dừng. Tiếp tục khi bạn sẵn sàng.",
-      "Tiếp tục →",
+      t("TAKE A BREAK", "DỪNG MỘT CHÚT"),
+      t("The pusher rests too.", "Bàn đẩy cũng nghỉ."),
+      t("Balls, peg board and bonus wheel are paused. Resume when ready.", "Bóng, bảng đinh và vòng thưởng đã dừng. Tiếp tục khi bạn sẵn sàng."),
+      t("Resume →", "Tiếp tục →"),
     );
   else $("overlay").hidden = true;
   document.activeElement?.blur();
@@ -313,10 +315,10 @@ function finish() {
   $("pause").disabled = true;
   clearInput();
   card(
-    "HẾT CREDIT",
-    "Game over.",
-    `${game.score} điểm · ${game.frontBig} bóng lớn · ${game.chests} rương · ${game.shots} bóng đã thả. Chọn vị trí trên bảng đinh và căn nhịp bàn đẩy.`,
-    "Chơi ván mới →",
+    t("OUT OF CREDITS", "HẾT CREDIT"),
+    t("Game over.", "Kết thúc ván."),
+    t(`${game.score} points · ${game.frontBig} big balls · ${game.chests} chests · ${game.shots} balls dropped. Aim above the pegs and time the pusher.`, `${game.score} điểm · ${game.frontBig} bóng lớn · ${game.chests} rương · ${game.shots} bóng đã thả. Chọn vị trí trên bảng đinh và căn nhịp bàn đẩy.`),
+    t("New round →", "Chơi ván mới →"),
   );
   tone(180);
 }
@@ -324,11 +326,11 @@ $("play").addEventListener("click", () => (paused ? togglePause() : start()));
 $("pause").addEventListener("click", togglePause);
 $("sound").addEventListener("click", () => {
   muted = !muted;
-  $("sound").textContent = muted ? "♪ Âm thanh: tắt" : "♪ Âm thanh: bật";
+  $("sound").textContent = muted ? t("♪ Sound: off", "♪ Âm thanh: tắt") : t("♪ Sound: on", "♪ Âm thanh: bật");
   $("sound").setAttribute("aria-pressed", String(!muted));
   $("sound").setAttribute(
     "aria-label",
-    muted ? "Bật âm thanh" : "Tắt âm thanh",
+    muted ? t("Enable sound", "Bật âm thanh") : t("Disable sound", "Tắt âm thanh"),
   );
   tone(520);
 });
@@ -431,33 +433,33 @@ function frame(now) {
     panel.material.emissiveIntensity = 0.3;
   });
   chest.rotation.z = Math.sin(game.time * 4) * (game.keys % 3) * 0.015;
-  $("tokens").textContent = `${game.tokens} CREDIT`;
-  $("score").textContent = `${game.score} ĐIỂM`;
+  $("tokens").textContent = t(`${game.tokens} CREDITS`, `${game.tokens} CREDIT`);
+  $("score").textContent = t(`${game.score} POINTS`, `${game.score} ĐIỂM`);
   $("ball-progress").textContent =
-    `BÓNG LỚN ${game.frontBig} · BỘ ${game.frontBig % 6}/6`;
+    t(`BIG BALLS ${game.frontBig} · SET ${game.frontBig % 6}/6`, `BÓNG LỚN ${game.frontBig} · BỘ ${game.frontBig % 6}/6`);
   $("key-progress").textContent =
-    `CHÌA ${game.keys % 3}/3 · RƯƠNG ${game.chests}`;
+    t(`KEYS ${game.keys % 3}/3 · CHESTS ${game.chests}`, `CHÌA ${game.keys % 3}/3 · RƯƠNG ${game.chests}`);
   $("bonus").textContent =
     game.phase === "over"
-      ? "HẾT CREDIT · THƯỞNG ĐÃ DỪNG"
+      ? t("OUT OF CREDITS · REWARDS STOPPED", "HẾT CREDIT · THƯỞNG ĐÃ DỪNG")
       : game.spin
-        ? `${game.spin.reward.superBonus ? "SUPER BONUS ×3" : "BONUS"} · ĐANG QUAY 🎡`
+        ? t(`${game.spin.reward.superBonus ? "SUPER BONUS ×3" : "BONUS"} · SPINNING 🎡`, `${game.spin.reward.superBonus ? "SUPER BONUS ×3" : "BONUS"} · ĐANG QUAY 🎡`)
         : game.lastBonus
-          ? `THƯỞNG: +${rewardLabel(game.lastBonus)}`
-          : "BÓNG LỚN RƠI → VÒNG THƯỞNG";
+          ? t(`REWARD: +${rewardLabel(game.lastBonus)}`, `THƯỞNG: +${rewardLabel(game.lastBonus)}`)
+          : t("BIG BALL COLLECTED → BONUS WHEEL", "BÓNG LỚN RƠI → VÒNG THƯỞNG");
   $("wheel-status").textContent =
     game.phase === "over"
-      ? "VÁN ĐÃ KẾT THÚC"
+      ? t("ROUND ENDED", "VÁN ĐÃ KẾT THÚC")
       : game.plinkoBalls.length
-        ? `${game.plinkoBalls.length} BÓNG QUA ĐINH`
+        ? t(`${game.plinkoBalls.length} BALLS THROUGH PEGS`, `${game.plinkoBalls.length} BÓNG QUA ĐINH`)
         : game.lastChannel >= 0
-          ? `Ô TRÚNG: ${rewardLabel(CHANNELS[game.lastChannel])}`
-          : "PLINKO → BÀN ĐẨY";
+          ? t(`CHANNEL: ${rewardLabel(CHANNELS[game.lastChannel])}`, `Ô TRÚNG: ${rewardLabel(CHANNELS[game.lastChannel])}`)
+          : t("PLINKO → PUSHER", "PLINKO → BÀN ĐẨY");
   $("tip").textContent = game.message;
   $("aim-value").textContent =
     Math.abs(game.aim) < 0.15
-      ? "GIỮA"
-      : `${game.aim < 0 ? "TRÁI" : "PHẢI"} ${Math.round((Math.abs(game.aim) / 1.9) * 100)}%`;
+      ? t("CENTER", "GIỮA")
+      : t(`${game.aim < 0 ? "LEFT" : "RIGHT"} ${Math.round((Math.abs(game.aim) / 1.9) * 100)}%`, `${game.aim < 0 ? "TRÁI" : "PHẢI"} ${Math.round((Math.abs(game.aim) / 1.9) * 100)}%`);
   const inactive = paused || game.phase !== "playing";
   $("aim").disabled = inactive;
   $("fire").disabled =
@@ -468,9 +470,9 @@ function frame(now) {
     game.pendingSmall + game.pendingBig > 70 ||
     game.plinkoBalls.length >= 6;
   if (game.phase === "playing" && game.pieces.length >= MAX_PIECES)
-    $("tip").textContent = "Bàn đang đầy. Chờ bóng rơi xuống mép rồi thả tiếp.";
+    $("tip").textContent = t("The table is full. Wait for balls to fall off the ledge before dropping more.", "Bàn đang đầy. Chờ bóng rơi xuống mép rồi thả tiếp.");
   if (game.phase === "over")
-    $("tip").textContent = "Hết credit. Bàn đẩy và phần thưởng đã dừng.";
+    $("tip").textContent = t("Out of credits. The pusher and rewards have stopped.", "Hết credit. Bàn đẩy và phần thưởng đã dừng.");
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
@@ -480,3 +482,4 @@ setupGameExit({
   isPaused: () => paused,
   togglePause,
 });
+setupLanguageUI(staticPairs);

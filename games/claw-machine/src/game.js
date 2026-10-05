@@ -1,3 +1,4 @@
+import { t as translate } from '../../../src/i18n.js';
 export const CHUTE = { x: -2.05, z: 1.45 };
 const clamp = (n, low, high) => Math.max(low, Math.min(high, n));
 export function createGame(random = Math.random) {
@@ -33,7 +34,7 @@ export function createGame(random = Math.random) {
     grip: 0,
     carried: null,
     bears,
-    message: "Căn càng vào giữa thân gấu. Mỗi ván có 3 lượt.",
+    message: translate("Aim at the center of a bear. Each round has 3 attempts.", "Căn càng vào giữa thân gấu. Mỗi ván có 3 lượt."),
   };
 }
 export function grab(game) {
@@ -42,7 +43,7 @@ export function grab(game) {
   game.attempts--;
   game.stage = "descend";
   game.stageTime = 0;
-  game.message = "Càng đang hạ…";
+  game.message = translate("Claw descending…", "Càng đang hạ…");
   return true;
 }
 function transition(game, stage) {
@@ -53,7 +54,7 @@ function release(game, slipped = false) {
   if (!game.carried) return;
   game.carried.vy = 0;
   game.carried = null;
-  if (slipped) game.message = "Gấu tuột rồi! Cần gắp sâu vào giữa thân hơn.";
+  if (slipped) game.message = translate("The bear slipped! Aim deeper into the center of its body.", "Gấu tuột rồi! Cần gắp sâu vào giữa thân hơn.");
 }
 function capture(game) {
   const nearest = game.bears
@@ -67,7 +68,7 @@ function capture(game) {
     ? Math.hypot(nearest.x - game.x, nearest.z - game.z)
     : Infinity;
   if (distance > 0.32) {
-    game.message = "Càng khép hụt. Thử chỉnh cả chiều ngang lẫn chiều sâu.";
+    game.message = translate("The claw missed. Adjust both width and depth.", "Càng khép hụt. Thử chỉnh cả chiều ngang lẫn chiều sâu.");
     return;
   }
   const crowded = game.bears.some(
@@ -83,7 +84,7 @@ function capture(game) {
     Math.abs(nearest.tilt) * 0.12 -
     (crowded ? 0.12 : 0);
   game.carried = nearest;
-  game.message = "Đã kẹp được gấu… chờ xem có giữ nổi không!";
+  game.message = translate("Bear caught… can the claw hold on?", "Đã kẹp được gấu… chờ xem có giữ nổi không!");
 }
 function physics(game, dt) {
   for (const bear of game.bears) {
@@ -95,7 +96,7 @@ function physics(game, dt) {
     if (inChute && bear.y < 0.05) {
       bear.collected = true;
       game.score++;
-      game.message = "Nhận được gấu! +1 điểm 🧸";
+      game.message = translate("Bear collected! +1 point 🧸", "Nhận được gấu! +1 điểm 🧸");
       continue;
     }
     if (!inChute && bear.y < 0.48) {
@@ -155,7 +156,7 @@ export function step(game, dt, dx = 0, dz = 0) {
       else {
         transition(game, "aim");
         game.timer = 20;
-        game.message = `Còn ${game.attempts} lượt. Căn giữa thân gấu trước khi gắp.`;
+        game.message = translate(`${game.attempts} attempts left. Aim at the center of a bear before grabbing.`, `Còn ${game.attempts} lượt. Căn giữa thân gấu trước khi gắp.`);
       }
     }
   }

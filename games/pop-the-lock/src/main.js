@@ -1,3 +1,5 @@
+import { staticPairs } from './translations.js';
+import { t, setupLanguageUI } from '../../../src/i18n.js';
 import * as THREE from 'three';
 import './style.css';
 import { createGame, step, tap, MODES } from './game.js';
@@ -12,7 +14,7 @@ function recordKey() { return selectedStyle === 'endless' ? 'pop-lock-endless-be
 function loadBest() {
   best = 0; try { best = Number(localStorage.getItem(recordKey())) || 0; } catch {}
   $('best').textContent = String(best).padStart(2, '0');
-  $('record-label').textContent = selectedStyle === 'endless' ? 'KỶ LỤC ENDLESS' : 'MÀN CAO NHẤT ĐÃ QUA';
+  $('record-label').textContent = selectedStyle === 'endless' ? t("ENDLESS BEST", "KỶ LỤC ENDLESS") : t("HIGHEST LEVEL CLEARED", "MÀN CAO NHẤT ĐÃ QUA");
 }
 loadBest();
 const scene = new THREE.Scene(); scene.background = new THREE.Color('#203e3b');
@@ -59,8 +61,8 @@ function start() {
   const elapsed = game.phase === 'won' ? game.elapsed : 0;
   game = createGame(level, Math.random, { mode: selectedMode, elapsed, style: selectedStyle }); game.phase = 'playing'; paused = false; last = 0;
   refreshZone(); $('overlay').hidden = true; $('tap').disabled = false; $('pause').disabled = false;
-  $('pause').textContent = 'Ⅱ'; $('pause').setAttribute('aria-label', 'Tạm dừng');
-  $('tip').textContent = 'Bấm khi kim nằm trong vùng xanh. Mỗi lần trúng sẽ đổi chiều.';
+  $('pause').textContent = 'Ⅱ'; $('pause').setAttribute('aria-label', t("Pause", "Tạm dừng"));
+  $('tip').textContent = t("Tap when the needle is in the green zone. Each hit reverses direction.", "Bấm khi kim nằm trong vùng xanh. Mỗi lần trúng sẽ đổi chiều.");
   document.activeElement?.blur();
 }
 function finish() {
@@ -68,32 +70,32 @@ function finish() {
   if (game.style === 'endless') {
     best = Math.max(best, game.hits); try { localStorage.setItem(recordKey(), String(best)); } catch {}
     $('best').textContent = String(best).padStart(2, '0'); tone(160);
-    card('ENDLESS · LỆCH MỘT NHỊP', 'Thử phá kỷ lục nhé.', `Bạn trúng ${game.hits} lần trong ${game.elapsed.toFixed(1)} giây. Kỷ lục: ${best} lần trúng.`, 'Chơi lại Endless →');
+    card(t("ENDLESS · MISSED THE BEAT", "ENDLESS · LỆCH MỘT NHỊP"), t("Try to beat your record.", "Thử phá kỷ lục nhé."), t(`You scored ${game.hits} hits in ${game.elapsed.toFixed(1)} seconds. Best: ${best} hits.`, `Bạn trúng ${game.hits} lần trong ${game.elapsed.toFixed(1)} giây. Kỷ lục: ${best} lần trúng.`), t("Play Endless again →", "Chơi lại Endless →"));
   } else if (game.phase === 'won') {
     best = Math.max(best, game.level); try { localStorage.setItem('pop-lock-best', String(best)); } catch {}
     $('best').textContent = String(best).padStart(2, '0'); tone(880);
-    card('MỞ KHÓA THÀNH CÔNG', 'Đúng nhịp rồi!', `Đã qua màn ${game.level}. Màn tiếp theo cần ${game.level + 1} lần trúng, kim nhanh hơn và vùng xanh hẹp hơn.`, `Màn ${game.level + 1} →`);
+    card(t("LOCK OPENED", "MỞ KHÓA THÀNH CÔNG"), t("Right on beat!", "Đúng nhịp rồi!"), t(`Level ${game.level} cleared. Next level needs ${game.level + 1} hits, with a faster needle and a narrower green zone.`, `Đã qua màn ${game.level}. Màn tiếp theo cần ${game.level + 1} lần trúng, kim nhanh hơn và vùng xanh hẹp hơn.`), t(`Level ${game.level + 1} →`, `Màn ${game.level + 1} →`));
   } else {
-    tone(160); card('LỆCH MỘT NHỊP', 'Thử lại nhé.', `Màn ${game.level}: bạn trúng ${game.hits}/${game.level} lần. Bấm sớm hoặc để kim đi quá đều làm khóa đóng lại.`, `Thử lại màn ${game.level} →`);
+    tone(160); card(t("MISSED THE BEAT", "LỆCH MỘT NHỊP"), t("Try again.", "Thử lại nhé."), t(`Level ${game.level}: you hit ${game.hits}/${game.level} targets. Tapping early or passing the target closes the lock.`, `Màn ${game.level}: bạn trúng ${game.hits}/${game.level} lần. Bấm sớm hoặc để kim đi quá đều làm khóa đóng lại.`), t(`Retry level ${game.level} →`, `Thử lại màn ${game.level} →`));
   }
 }
 function attempt() { if (paused || game.phase !== 'playing') return; if (tap(game)) tone(520); if (game.phase !== 'playing') finish(); }
 function togglePause() {
   if (game.phase !== 'playing') return;
-  paused = !paused; last = 0; $('pause').textContent = paused ? '▶' : 'Ⅱ'; $('pause').setAttribute('aria-label', paused ? 'Tiếp tục' : 'Tạm dừng');
-  if (paused) card('DỪNG MỘT NHỊP', 'Khóa cũng chờ bạn.', 'Kim đã dừng. Tiếp tục khi bạn sẵn sàng.', 'Tiếp tục →');
+  paused = !paused; last = 0; $('pause').textContent = paused ? '▶' : 'Ⅱ'; $('pause').setAttribute('aria-label', paused ? t("Resume", "Tiếp tục") : t("Pause", "Tạm dừng"));
+  if (paused) card(t("TAKE A BEAT", "DỪNG MỘT NHỊP"), t("The lock can wait.", "Khóa cũng chờ bạn."), t("The needle has stopped. Resume when ready.", "Kim đã dừng. Tiếp tục khi bạn sẵn sàng."), t("Resume →", "Tiếp tục →"));
   else { $('overlay').hidden = true; $('tap').disabled = false; }
   document.activeElement?.blur();
 }
-const modeDescriptions = { easy: 'Tăng chậm: +0.075 rad/s mỗi 10 giây chơi.', normal: 'Tăng vừa: +0.20 rad/s mỗi 10 giây chơi.', hard: 'Tăng nhanh: +0.40 rad/s mỗi 10 giây chơi.', extreme: 'Siêu khó: +0.80 rad/s mỗi 10 giây chơi.' };
+const modeDescriptions = { easy: t("Slow acceleration: +0.075 rad/s every 10 seconds of play.", "Tăng chậm: +0.075 rad/s mỗi 10 giây chơi."), normal: t("Moderate acceleration: +0.20 rad/s every 10 seconds of play.", "Tăng vừa: +0.20 rad/s mỗi 10 giây chơi."), hard: t("Fast acceleration: +0.40 rad/s every 10 seconds of play.", "Tăng nhanh: +0.40 rad/s mỗi 10 giây chơi."), extreme: t("Extreme: +0.80 rad/s every 10 seconds of play.", "Siêu khó: +0.80 rad/s mỗi 10 giây chơi.") };
 function updateSettings() {
   selectedMode = $('mode').value; selectedStyle = $('style').value; loadBest();
   $('mode-description').textContent = modeDescriptions[selectedMode];
   try { localStorage.setItem('pop-lock-mode', selectedMode); } catch {}
   game = createGame(1, Math.random, { mode: selectedMode, style: selectedStyle }); refreshZone();
   const endless = selectedStyle === 'endless';
-  $('tip').textContent = endless ? 'Endless: mỗi lần trúng thêm một điểm.' : 'Màn N cần N lần trúng liên tiếp.';
-  card(endless ? 'THỬ THÁCH KHÔNG GIỚI HẠN' : 'MỞ KHÓA ĐẦU TIÊN', 'Bắt đúng nhịp.', endless ? 'Bấm khi kim vàng nằm trong vùng xanh. Trúng đổi chiều và cộng điểm. Chơi liên tục tới khi bấm sai hoặc bỏ lỡ!' : 'Mỗi màn cần số lần trúng tăng dần. Qua màn giữ thời gian tăng tốc; thử lại đặt thời gian về 0.', 'Bắt đầu →');
+  $('tip').textContent = endless ? t("Endless: each hit adds one point.", "Endless: mỗi lần trúng thêm một điểm.") : t("Level N needs N consecutive hits.", "Màn N cần N lần trúng liên tiếp.");
+  card(endless ? t("ENDLESS CHALLENGE", "THỬ THÁCH KHÔNG GIỚI HẠN") : t("OPEN YOUR FIRST LOCK", "MỞ KHÓA ĐẦU TIÊN"), t("Hit the beat.", "Bắt đúng nhịp."), endless ? t("Tap when the gold needle is in the green zone. Hits reverse direction and add points. Keep going until you mistime or miss a tap!", "Bấm khi kim vàng nằm trong vùng xanh. Trúng đổi chiều và cộng điểm. Chơi liên tục tới khi bấm sai hoặc bỏ lỡ!") : t("Each level needs more hits. Clearing a level keeps acceleration time; retrying resets it to zero.", "Mỗi màn cần số lần trúng tăng dần. Qua màn giữ thời gian tăng tốc; thử lại đặt thời gian về 0."), t("Start →", "Bắt đầu →"));
 }
 $('mode').addEventListener('change', updateSettings);
 $('style').addEventListener('change', updateSettings);
@@ -103,7 +105,7 @@ $('tap').addEventListener('pointerdown', event => { event.preventDefault(); atte
 $('tap').addEventListener('click', event => { if (event.detail === 0) attempt(); });
 renderer.domElement.addEventListener('pointerdown', event => { event.preventDefault(); attempt(); });
 $('pause').addEventListener('click', togglePause);
-$('sound').addEventListener('click', () => { muted = !muted; $('sound').textContent = muted ? '♪ Âm thanh: tắt' : '♪ Âm thanh: bật'; $('sound').setAttribute('aria-pressed', String(!muted)); $('sound').setAttribute('aria-label', muted ? 'Bật âm thanh' : 'Tắt âm thanh'); tone(520); });
+$('sound').addEventListener('click', () => { muted = !muted; $('sound').textContent = muted ? t("♪ Sound: off", "♪ Âm thanh: tắt") : t("♪ Sound: on", "♪ Âm thanh: bật"); $('sound').setAttribute('aria-pressed', String(!muted)); $('sound').setAttribute('aria-label', muted ? t("Enable sound", "Bật âm thanh") : t("Mute sound", "Tắt âm thanh")); tone(520); });
 window.addEventListener('keydown', event => {
   if (event.repeat || event.target.closest('button, a, input, select')) return;
   if (event.code === 'Space' || event.code === 'Enter') { event.preventDefault(); if (paused) togglePause(); else if (game.phase === 'playing') attempt(); else start(); }
@@ -119,9 +121,11 @@ function frame(now) {
   target.position.set(Math.sin(game.target) * 2, Math.cos(game.target) * 2, .2);
   zone.rotation.z = Math.PI / 2 - game.target - game.tolerance;
   $('remaining').textContent = game.style === 'endless' ? game.hits : game.level - game.hits;
-  $('counter-label').textContent = game.style === 'endless' ? 'LẦN TRÚNG' : 'LẦN CẦN BẤM';
-  $('level').textContent = game.style === 'endless' ? 'ENDLESS' : `MÀN ${String(game.level).padStart(2, '0')}`; $('speed').textContent = `${MODES[game.mode].label.toUpperCase()} · ${game.speed.toFixed(2)} RAD/S · ${Math.floor(game.elapsed)}s`;
+  $('counter-label').textContent = game.style === 'endless' ? t("HITS", "LẦN TRÚNG") : t("HITS TO GO", "LẦN CẦN BẤM");
+  $('level').textContent = game.style === 'endless' ? 'ENDLESS' : t(`LEVEL ${String(game.level).padStart(2, '0')}`, `MÀN ${String(game.level).padStart(2, '0')}`); $('speed').textContent = `${MODES[game.mode].label.toUpperCase()} · ${game.speed.toFixed(2)} RAD/S · ${Math.floor(game.elapsed)}s`;
   renderer.render(scene, camera); requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
 setupGameExit({ isPlaying: () => game.phase === 'playing', isPaused: () => paused, togglePause });
+
+setupLanguageUI(staticPairs);

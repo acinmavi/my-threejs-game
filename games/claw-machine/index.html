@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -11,54 +11,52 @@
       <header>
         <a class="brand" href="/"
           ><span>✦</span> SKY CLUB <small>ARCADE / 004</small></a
-        ><button id="sound" aria-label="Bật âm thanh" aria-pressed="false">
-          ♪ Âm thanh: tắt
+        ><button id="sound" aria-label="Enable sound" aria-pressed="false">
+          ♪ Sound: off
         </button>
       </header>
       <section class="intro">
         <div>
-          <div class="eyebrow">CĂN THẬT KỸ. GIỮ THẬT CHẮC.</div>
+          <div class="eyebrow">AIM CAREFULLY. HOLD TIGHT.</div>
           <h1>Claw <em>Club</em><i>↗</i></h1>
-          <p>Ba lượt gắp. Một tủ gấu. Không dễ mang về đâu nhé.</p>
+          <p>Three grabs. A cabinet of bears. Bringing one home takes skill.</p>
         </div>
         <div class="record">
-          <span>KỶ LỤC MỖI VÁN</span><strong id="best">00</strong>
+          <span>BEST ROUND</span><strong id="best">00</strong>
         </div>
       </section>
-      <section class="game-frame" aria-label="Máy gắp gấu 3D">
+      <section class="game-frame" aria-label="3D claw machine">
         <div id="world"></div>
         <div class="hud">
-          <span id="attempts">3 LƯỢT</span><span id="timer">20 GIÂY CĂN</span
-          ><span id="score">0 GẤU</span
-          ><button id="pause" aria-label="Tạm dừng" disabled>Ⅱ</button>
+          <span id="attempts">3 ATTEMPTS</span><span id="timer">20 SECONDS TO AIM</span
+          ><span id="score">0 BEARS</span
+          ><button id="pause" aria-label="Pause" disabled>Ⅱ</button>
         </div>
         <div id="overlay">
-          <span id="card-label">MÁY GẮP GẤU · 3 LƯỢT</span>
-          <h2 id="card-title">Mang gấu về nhé.</h2>
+          <span id="card-label">CLAW MACHINE · 3 ATTEMPTS</span>
+          <h2 id="card-title">Bring a bear home.</h2>
           <p id="card-copy">
-            Căn càng bằng WASD / phím mũi tên hoặc nút chạm. Space để gắp. Mỗi
-            lượt có 20 giây. Càng yếu: lệch tâm, gấu nặng hoặc nghiêng dễ tuột
-            khi nâng và di chuyển.
+            Aim with WASD / arrow keys or touch buttons. Space to grab. Each attempt has 20 seconds. Weak grips, off-center grabs, heavy or tilted bears can slip during lifting and travel.
           </p>
-          <button id="play">Bắt đầu ván →</button>
+          <button id="play">Start round →</button>
         </div>
-        <button id="view">Góc nhìn: trái ↔</button>
+        <button id="view">View: left ↔</button>
         <div id="tip" aria-live="polite">
-          Căn cả chiều ngang và chiều sâu. Vòng dưới sàn là tâm càng.
+          Aim across both width and depth. The floor ring marks the claw center.
         </div>
       </section>
       <div class="controls">
-        <div class="dpad" aria-label="Di chuyển càng">
-          <button data-dx="0" data-dz="-1" aria-label="Vào sâu">↑</button
-          ><button data-dx="-1" data-dz="0" aria-label="Sang trái">←</button
-          ><button data-dx="0" data-dz="1" aria-label="Ra trước">↓</button
-          ><button data-dx="1" data-dz="0" aria-label="Sang phải">→</button>
+        <div class="dpad" aria-label="Move claw">
+          <button data-dx="0" data-dz="-1" aria-label="Move back">↑</button
+          ><button data-dx="-1" data-dz="0" aria-label="Move left">←</button
+          ><button data-dx="0" data-dz="1" aria-label="Move forward">↓</button
+          ><button data-dx="1" data-dz="0" aria-label="Move right">→</button>
         </div>
-        <button id="grab" disabled>GẮP GẤU <small>SPACE</small></button>
+        <button id="grab" disabled>GRAB BEAR <small>SPACE</small></button>
       </div>
       <footer>
-        <span>Giữ WASD / phím mũi tên / nút chạm để di chuyển</span
-        ><span>P tạm dừng · Esc về Home · Gấu vào cửa mới tính điểm</span>
+        <span>Hold WASD / arrow keys / touch buttons to move</span
+        ><span>P to pause · Esc to go Home · Score when a bear enters the chute</span>
       </footer>
     </main>
     <script type="module" src="./src/main.js"></script>

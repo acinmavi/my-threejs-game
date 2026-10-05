@@ -6,3 +6,5 @@
 .claw .art img{transform:none;object-position:center}.claw .art{background:#becfc2}
 
 .pusher .art{background:#aabfbb}.pusher .art img{object-fit:contain}
+
+header .language-select{border-color:#ccd7c3;background:#fcfcf5;color:#29463b} @media(max-width:700px){header .collection{display:none}}

@@ -1,3 +1,5 @@
+import { staticPairs } from "./translations.js";
+import { t, setupLanguageUI } from "../../../src/i18n.js";
 import * as THREE from "three";
 import "./style.css";
 import {
@@ -30,7 +32,7 @@ try {
 $("best").textContent = String(best).padStart(2, "0");
 $("stone-list").innerHTML = COLORS.map(
   (color, i) =>
-    `<span class="stone" style="--color:#d6ad62" aria-label="Đá ${i + 1}: chưa thu"></span>`,
+    t(`<span class="stone" style="--color:#d6ad62" aria-label="Stone ${i + 1}: not collected"></span>`, `<span class="stone" style="--color:#d6ad62" aria-label="Đá ${i + 1}: chưa thu"></span>`),
 ).join("");
 const scene = new THREE.Scene();
 scene.background = new THREE.Color("#aabfbb");
@@ -146,7 +148,7 @@ for (let i = 0; i < WHEEL_VALUES.length; i++) {
   context.textAlign = "center";
   context.fillText(String(WHEEL_VALUES[i]), 64, 74);
   context.font = "22px sans-serif";
-  context.fillText("XU", 64, 104);
+  context.fillText(t("COINS", "XU"), 64, 104);
   const label = new THREE.Sprite(
     new THREE.SpriteMaterial({
       map: new THREE.CanvasTexture(canvas),
@@ -312,7 +314,7 @@ function start() {
   $("overlay").hidden = true;
   $("pause").disabled = false;
   $("pause").textContent = "Ⅱ";
-  $("pause").setAttribute("aria-label", "Tạm dừng");
+  $("pause").setAttribute("aria-label", t("Pause", "Tạm dừng"));
   document.activeElement?.blur();
 }
 function togglePause() {
@@ -322,13 +324,13 @@ function togglePause() {
   accumulator = 0;
   clearInput();
   $("pause").textContent = paused ? "▶" : "Ⅱ";
-  $("pause").setAttribute("aria-label", paused ? "Tiếp tục" : "Tạm dừng");
+  $("pause").setAttribute("aria-label", paused ? t("Resume", "Tiếp tục") : t("Pause", "Tạm dừng"));
   if (paused)
     card(
-      "DỪNG MỘT CHÚT",
-      "Bàn đẩy cũng nghỉ.",
-      "Xu, vòng mục tiêu và bonus đã dừng. Tiếp tục khi bạn sẵn sàng.",
-      "Tiếp tục →",
+      t("TAKE A BREAK", "DỪNG MỘT CHÚT"),
+      t("The pusher rests too.", "Bàn đẩy cũng nghỉ."),
+      t("Coins, target wheel and bonuses are paused. Resume when ready.", "Xu, vòng mục tiêu và bonus đã dừng. Tiếp tục khi bạn sẵn sàng."),
+      t("Resume →", "Tiếp tục →"),
     );
   else $("overlay").hidden = true;
   document.activeElement?.blur();
@@ -347,10 +349,10 @@ function finish() {
   $("pause").disabled = true;
   clearInput();
   card(
-    "HẾT CREDIT",
-    "Game over.",
-    `${game.score} điểm · ${game.collected} đá · ${game.shots} xu đã bắn. Căn ô thưởng trên vòng quay và tránh khe hai bên để chơi lâu hơn.`,
-    "Chơi ván mới →",
+    t("OUT OF CREDITS", "HẾT CREDIT"),
+    t("Game over.", "Kết thúc ván."),
+    t(`${game.score} points · ${game.collected} stones · ${game.shots} coins fired. Time the reward sectors and avoid side gaps to play longer.`, `${game.score} điểm · ${game.collected} đá · ${game.shots} xu đã bắn. Căn ô thưởng trên vòng quay và tránh khe hai bên để chơi lâu hơn.`),
+    t("New round →", "Chơi ván mới →"),
   );
   tone(180);
 }
@@ -358,11 +360,11 @@ $("play").addEventListener("click", () => (paused ? togglePause() : start()));
 $("pause").addEventListener("click", togglePause);
 $("sound").addEventListener("click", () => {
   muted = !muted;
-  $("sound").textContent = muted ? "♪ Âm thanh: tắt" : "♪ Âm thanh: bật";
+  $("sound").textContent = muted ? t("♪ Sound: off", "♪ Âm thanh: tắt") : t("♪ Sound: on", "♪ Âm thanh: bật");
   $("sound").setAttribute("aria-pressed", String(!muted));
   $("sound").setAttribute(
     "aria-label",
-    muted ? "Bật âm thanh" : "Tắt âm thanh",
+    muted ? t("Enable sound", "Bật âm thanh") : t("Disable sound", "Tắt âm thanh"),
   );
   tone(520);
 });
@@ -489,42 +491,42 @@ function frame(now) {
   }
   coins.count = count;
   coins.instanceMatrix.needsUpdate = true;
-  $("tokens").textContent = `${game.tokens} CREDIT`;
-  $("score").textContent = `${game.score} ĐIỂM`;
+  $("tokens").textContent = t(`${game.tokens} CREDITS`, `${game.tokens} CREDIT`);
+  $("score").textContent = t(`${game.score} POINTS`, `${game.score} ĐIỂM`);
   $("stone-label").textContent =
-    `ĐÁ ${game.collected} · BỘ ${game.collected % 6}/6`;
+    t(`STONES ${game.collected} · SET ${game.collected % 6}/6`, `ĐÁ ${game.collected} · BỘ ${game.collected % 6}/6`);
   for (const [i, el] of [...$("stone-list").children].entries()) {
     el.classList.toggle("collected", i < game.collected % 6);
     el.setAttribute(
       "aria-label",
-      `Tiến độ ${i + 1}/6: ${i < game.collected % 6 ? "đã thu" : "chưa thu"}`,
+      t(`Progress ${i + 1}/6: ${i < game.collected % 6 ? "collected" : "not collected"}`, `Tiến độ ${i + 1}/6: ${i < game.collected % 6 ? "đã thu" : "chưa thu"}`),
     );
   }
   $("bonus").textContent =
     game.phase === "over"
-      ? "HẾT CREDIT · THƯỞNG ĐÃ DỪNG"
+      ? t("OUT OF CREDITS · REWARDS STOPPED", "HẾT CREDIT · THƯỞNG ĐÃ DỪNG")
       : game.spin
-        ? `${game.spin.reward.superBonus ? "SUPER BONUS ×3" : "ĐÁ → BONUS SPIN"} 🎡 · ĐANG QUAY`
+        ? t(`${game.spin.reward.superBonus ? "SUPER BONUS ×3" : "STONE → BONUS SPIN"} 🎡 · SPINNING`, `${game.spin.reward.superBonus ? "SUPER BONUS ×3" : "ĐÁ → BONUS SPIN"} 🎡 · ĐANG QUAY`)
         : game.lastBonus
           ? `${game.lastBonus.superBonus ? "JACKPOT ×3" : "BONUS"}: +${bonusLabel(game.lastBonus)}`
-          : "VÒNG ĐÁ: XU / ĐÁ / ĐIỂM · 6 ĐÁ → ×3";
+          : t("STONE WHEEL: COINS / STONES / POINTS · 6 STONES → ×3", "VÒNG ĐÁ: XU / ĐÁ / ĐIỂM · 6 ĐÁ → ×3");
   $("wheel-status").textContent =
     game.phase === "over"
-      ? "VÁN ĐÃ KẾT THÚC"
+      ? t("ROUND ENDED", "VÁN ĐÃ KẾT THÚC")
       : game.flights.length
-        ? "TOKEN → VÒNG QUAY"
+        ? t("TOKEN → WHEEL", "TOKEN → VÒNG QUAY")
         : game.pendingCoins
-          ? `ĐANG THẢ ${game.pendingCoins} XU`
+          ? t(`DROPPING ${game.pendingCoins} COINS`, `ĐANG THẢ ${game.pendingCoins} XU`)
           : game.lastWheel
-            ? `Ô VỪA TRÚNG: ${game.lastWheel} XU`
-            : `Ô ĐANG QUA: ${wheelAward(game.wheel)} XU`;
+            ? t(`LAST SECTOR: ${game.lastWheel} COINS`, `Ô VỪA TRÚNG: ${game.lastWheel} XU`)
+            : t(`CURRENT SECTOR: ${wheelAward(game.wheel)} ${wheelAward(game.wheel) === 1 ? "COIN" : "COINS"}`, `Ô ĐANG QUA: ${wheelAward(game.wheel)} XU`);
   $("stone-progress").textContent =
-    `${game.frontCoins % STONE_THRESHOLD}/${STONE_THRESHOLD} ĐIỂM TỪ XU → ĐÁ MỚI`;
+    t(`${game.frontCoins % STONE_THRESHOLD}/${STONE_THRESHOLD} COIN POINTS → NEW STONE`, `${game.frontCoins % STONE_THRESHOLD}/${STONE_THRESHOLD} ĐIỂM TỪ XU → ĐÁ MỚI`);
   $("tip").textContent = game.message;
   $("aim-value").textContent =
     Math.abs(game.aim) < 0.15
-      ? "GIỮA"
-      : `${game.aim < 0 ? "TRÁI" : "PHẢI"} ${Math.round((Math.abs(game.aim) / 2.1) * 100)}%`;
+      ? t("CENTER", "GIỮA")
+      : t(`${game.aim < 0 ? "LEFT" : "RIGHT"} ${Math.round((Math.abs(game.aim) / 2.1) * 100)}%`, `${game.aim < 0 ? "TRÁI" : "PHẢI"} ${Math.round((Math.abs(game.aim) / 2.1) * 100)}%`);
   const inactive = paused || game.phase !== "playing";
   $("aim").disabled = inactive;
   $("fire").disabled =
@@ -534,9 +536,9 @@ function frame(now) {
     game.pendingCoins > 60;
   if (game.phase === "playing" && game.pieces.length >= MAX_PIECES)
     $("tip").textContent =
-      "Bàn xu đang đầy. Chờ bàn đẩy dồn xu xuống rồi bắn tiếp.";
+      t("The coin table is full. Wait for the pusher to move coins off before firing.", "Bàn xu đang đầy. Chờ bàn đẩy dồn xu xuống rồi bắn tiếp.");
   if (game.phase === "over")
-    $("tip").textContent = "Hết credit. Bàn đẩy và phần thưởng đã dừng.";
+    $("tip").textContent = t("Out of credits. The pusher and rewards have stopped.", "Hết credit. Bàn đẩy và phần thưởng đã dừng.");
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
@@ -546,3 +548,4 @@ setupGameExit({
   isPaused: () => paused,
   togglePause,
 });
+setupLanguageUI(staticPairs);

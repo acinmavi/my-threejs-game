@@ -1,3 +1,5 @@
+import { t } from './i18n.js';
+import './i18n.css';
 import './exit-dialog.css';
 
 export function setupGameExit({ isPlaying, isPaused, togglePause }) {
@@ -5,7 +7,7 @@ export function setupGameExit({ isPlaying, isPaused, togglePause }) {
   dialog.id = 'exit-dialog';
   dialog.setAttribute('aria-labelledby', 'exit-title');
   dialog.setAttribute('aria-describedby', 'exit-copy');
-  dialog.innerHTML = `<div class="exit-icon">↗</div><h2 id="exit-title">Về Home chọn game khác?</h2><p id="exit-copy">Lượt chơi hiện tại sẽ kết thúc. Kỷ lục đã lưu vẫn được giữ.</p><div class="exit-actions"><button id="exit-cancel" autofocus>Hủy — chơi tiếp</button><button id="exit-confirm">Về Home</button></div>`;
+  dialog.innerHTML = `<div class="exit-icon">↗</div><h2 id="exit-title">${t("Back Home to choose another game?", "Về Home chọn game khác?")}</h2><p id="exit-copy">${t("Your current round will end. Your saved best scores will be kept.", "Lượt chơi hiện tại sẽ kết thúc. Kỷ lục đã lưu vẫn được giữ.")}</p><div class="exit-actions"><button id="exit-cancel" autofocus>${t("Cancel \u2014 keep playing", "Hủy — chơi tiếp")}</button><button id="exit-confirm">${t("Back Home", "Về Home")}</button></div>`;
   document.body.appendChild(dialog);
   let resume = false;
   function open() {

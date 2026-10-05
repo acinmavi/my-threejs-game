@@ -11,3 +11,5 @@ P pauses both physics worlds, dispensing and wheel. Esc opens confirm-Home dialo
 Tests cover channels, credits, keys, all wheel rewards, repeated six-ball bonuses, physical Plinko traversal, cap, containment and lifecycle. Use root `npm test`, `npm run build`.
 
 Sphere radii: table small0.20, big0.38, Plinko0.13. Physical/render radii share constants. Maximum renderer pixel ratio1.5, shadow map512.
+
+The interface defaults to English. Use the language selector to switch to Vietnamese. The selection persists across Sky Club games; changing language reloads the page and starts a new round.

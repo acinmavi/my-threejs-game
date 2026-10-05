@@ -41,16 +41,20 @@ Simulation runs at 120 Hz. Tests cover hop completion, scoring, interpolation, b
 
 In the Sky Club collection, Escape and Home open an exit confirmation. Cancel resumes the prior play/pause state.
 
-## Độ khó
+## Difficulty
 
-Chọn Dễ / Thường / Khó / Rất khó / Siêu khó trước khi bắt đầu hoặc chơi lại. Lựa chọn được lưu trên trình duyệt; lượt đang chơi không đổi độ khó. Mặc định Thường.
+Choose Easy / Normal / Hard / Expert / Extreme before starting or replaying. The browser saves your choice; an active run keeps its difficulty. Normal is the default.
 
-| Chế độ | Tốc độ xe ban đầu → tối đa | Đạt tốc độ tối đa | Đường đạt 5 làn | Camera bắt đầu kéo |
+| Mode | Initial → maximum traffic speed | Maximum speed reached | Roads reach 5 lanes | Camera starts moving |
 | --- | --- | --- | --- | --- |
-| Dễ | 1× → 2.5× | 240 hàng | 144 hàng | Sau 8 giây |
-| Thường | 1.6× → 3.8× | 120 hàng | 72 hàng | Sau 5 giây |
-| Khó | 2.2× → 5.5× | 96 hàng | 48 hàng | Sau 3 giây |
-| Rất khó | 3× → 7× | 72 hàng | 36 hàng | Sau 2 giây |
-| Siêu khó | 4× → 9× | 48 hàng | 24 hàng | Sau 1.5 giây |
+| Easy | 1× → 2.5× | 240 rows | 144 rows | After 8 seconds |
+| Normal | 1.6× → 3.8× | 120 rows | 72 rows | After 5 seconds |
+| Hard | 2.2× → 5.5× | 96 rows | 48 rows | After 3 seconds |
+| Expert | 3× → 7× | 72 rows | 36 rows | After 2 seconds |
+| Extreme | 4× → 9× | 48 rows | 24 rows | After 1.5 seconds |
 
-Mỗi làn có tốc độ riêng. Khoảng trống xe có tối thiểu 3 / 1.35 / 0.8 / 0.6 / 0.42 giây theo chế độ, so với 0.18 giây mỗi bước nhảy. Camera tăng áp lực theo quãng đường và thời gian chơi, có giới hạn tốc độ.
+Each lane has its own speed. Minimum traffic gaps are 3 / 1.35 / 0.8 / 0.6 / 0.42 seconds by mode, compared with 0.18 seconds per hop. Camera pressure increases with distance and active play time, up to a speed limit.
+
+## Language
+
+English is the default. Use the language selector in the header to switch to Vietnamese. Your choice is saved across the Sky Club collection. Changing language reloads the game and starts a fresh round.

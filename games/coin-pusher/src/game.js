@@ -1,3 +1,4 @@
+import { t } from "../../../src/i18n.js";
 import * as CANNON from "cannon-es";
 export const COLORS = [
   "#a88bdf",
@@ -19,7 +20,7 @@ export const BONUS_REWARDS = [
   { kind: "points", amount: 150 },
 ];
 export function bonusLabel(reward) {
-  return `${reward.amount} ${{ coins: "XU", stones: "ĐÁ", points: "ĐIỂM" }[reward.kind]}`;
+  return t(`${reward.amount} ${{ coins: "COINS", stones: "STONES", points: "POINTS" }[reward.kind]}`, `${reward.amount} ${{ coins: "XU", stones: "ĐÁ", points: "ĐIỂM" }[reward.kind]}`);
 }
 export const FRONT = 2.55;
 export const SIDE = 2.55;
@@ -124,7 +125,7 @@ export function createGame(random = Math.random, populated = true) {
     generatedStones: 0,
     initialCoins: 0,
     message:
-      "Thả xu qua vòng quay. Xu thưởng rơi lên bàn trên rồi đẩy xuống bàn dưới.",
+      t("Fire through the wheel. Reward coins fall onto the upper shelf and push down to the lower table.", "Thả xu qua vòng quay. Xu thưởng rơi lên bàn trên rồi đẩy xuống bàn dưới."),
   };
   if (populated) {
     game.initialCoins = 156 + Math.floor(random() * 25);
@@ -194,13 +195,13 @@ export function shoot(game) {
   game.cooldown = SHOT_DELAY;
   game.flights.push({ id: game.nextFlight++, age: 0, aim: game.aim });
   game.message =
-    "Xu đang đi qua vòng quay… ô trúng quyết định số xu rơi lên bàn đẩy.";
+    t("The coin is flying through the wheel… the winning sector sets the coin payout.", "Xu đang đi qua vòng quay… ô trúng quyết định số xu rơi lên bàn đẩy.");
   return true;
 }
 function collect(game, piece, front) {
   if (!front) {
     game.lost++;
-    game.message = "Rơi khe bên: mất vật phẩm.";
+    game.message = t("Side gap: item lost.", "Rơi khe bên: mất vật phẩm.");
     return;
   }
   if (piece.kind === "coin") {
@@ -209,14 +210,14 @@ function collect(game, piece, front) {
     if (game.frontCoins % STONE_THRESHOLD === 0) {
       game.pendingStones++;
       game.message =
-        "Đủ 50 điểm từ xu cửa trước! Máy thả thêm một đá ngẫu nhiên.";
+        t("50 front-coin points! The machine releases another random stone.", "Đủ 50 điểm từ xu cửa trước! Máy thả thêm một đá ngẫu nhiên.");
     } else
-      game.message = `Xu cửa trước: +1 điểm. Tiến độ đá ${game.frontCoins % STONE_THRESHOLD}/${STONE_THRESHOLD} điểm từ xu.`;
+      game.message = t(`Front coin: +1 point. Stone progress ${game.frontCoins % STONE_THRESHOLD}/${STONE_THRESHOLD} coin points.`, `Xu cửa trước: +1 điểm. Tiến độ đá ${game.frontCoins % STONE_THRESHOLD}/${STONE_THRESHOLD} điểm từ xu.`);
   } else {
     game.collected++;
     game.score += 20;
     game.bonuses.push(false);
-    game.message = `Đã nhận ${game.collected} đá! Màu nào cũng tính, bộ ${game.collected % 6}/6.`;
+    game.message = t(`Collected ${game.collected} stones! Any color counts, set ${game.collected % 6}/6.`, `Đã nhận ${game.collected} đá! Màu nào cũng tính, bộ ${game.collected % 6}/6.`);
     if (game.collected % 6 === 0) {
       game.bonuses.push(true);
       game.score += 100;
@@ -272,7 +273,7 @@ export function step(game, dt) {
       game.pendingCoins += award + 1;
       game.rewards.push({ remaining: award + 1, aim: flight.aim });
       game.flights.splice(i, 1);
-      game.message = `Trúng ô ${award} xu! ${award} xu đang rơi lên bàn đẩy trên.`;
+      game.message = t(`Hit sector ${award} coins! ${award} coins are falling onto the upper shelf.`, `Trúng ô ${award} xu! ${award} xu đang rơi lên bàn đẩy trên.`);
     }
   }
   dispense(game, dt);
@@ -320,7 +321,7 @@ export function step(game, dt) {
       } else if (reward.kind === "stones") game.pendingStones += reward.amount;
       else game.score += reward.amount;
       game.lastBonus = reward;
-      game.message = `${reward.superBonus ? "SUPER BONUS / JACKPOT ×3" : "Bonus Spin"}: +${bonusLabel(reward)}! Credit không tăng.`;
+      game.message = t(`${reward.superBonus ? "SUPER BONUS / JACKPOT ×3" : "Bonus Spin"}: +${bonusLabel(reward)}! Credits do not refill.`, `${reward.superBonus ? "SUPER BONUS / JACKPOT ×3" : "Bonus Spin"}: +${bonusLabel(reward)}! Credit không tăng.`);
       game.spin = null;
     }
   }

@@ -7,7 +7,7 @@
     "dev": "vite --host 127.0.0.1 --port 5175",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1 --port 5176",
-    "test": "node --test games/flappy-three/test/*.test.js games/crossy-three/test/*.test.js games/pop-the-lock/test/*.test.js games/claw-machine/test/*.test.js games/coin-pusher/test/*.test.js games/treasure-ball/test/*.test.js"
+    "test": "node --test games/flappy-three/test/*.test.js games/crossy-three/test/*.test.js games/pop-the-lock/test/*.test.js games/claw-machine/test/*.test.js games/coin-pusher/test/*.test.js games/treasure-ball/test/*.test.js test/*.test.js"
   },
   "dependencies": {
     "cannon-es": "^0.20.0",

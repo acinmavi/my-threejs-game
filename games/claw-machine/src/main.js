@@ -1,3 +1,5 @@
+import { staticPairs } from './translations.js';
+import { t, setupLanguageUI } from '../../../src/i18n.js';
 import * as THREE from "three";
 import "./style.css";
 import { createGame, step, grab, CHUTE } from "./game.js";
@@ -177,7 +179,7 @@ function start() {
   $("overlay").hidden = true;
   $("pause").disabled = false;
   $("pause").textContent = "Ⅱ";
-  $("pause").setAttribute("aria-label", "Tạm dừng");
+  $("pause").setAttribute("aria-label", t("Pause", "Tạm dừng"));
   document.activeElement?.blur();
 }
 function togglePause() {
@@ -187,13 +189,13 @@ function togglePause() {
   accumulator = 0;
   clearInput();
   $("pause").textContent = paused ? "▶" : "Ⅱ";
-  $("pause").setAttribute("aria-label", paused ? "Tiếp tục" : "Tạm dừng");
+  $("pause").setAttribute("aria-label", paused ? t("Resume", "Tiếp tục") : t("Pause", "Tạm dừng"));
   if (paused)
     card(
-      "DỪNG MỘT CHÚT",
-      "Máy cũng nghỉ.",
-      "Đồng hồ và càng đã dừng. Tiếp tục khi bạn sẵn sàng.",
-      "Tiếp tục →",
+      t("TAKE A BREAK", "DỪNG MỘT CHÚT"),
+      t("The machine is resting.", "Máy cũng nghỉ."),
+      t("The timer and claw have stopped. Resume when ready.", "Đồng hồ và càng đã dừng. Tiếp tục khi bạn sẵn sàng."),
+      t("Resume →", "Tiếp tục →"),
     );
   else $("overlay").hidden = true;
   document.activeElement?.blur();
@@ -213,10 +215,10 @@ function finish() {
   $("pause").disabled = true;
   clearInput();
   card(
-    "HẾT 3 LƯỢT",
-    game.score ? "Gấu đã về với bạn!" : "Suýt được rồi…",
-    `Bạn mang về ${game.score}/3 gấu. Gắp lệch sẽ yếu; thử căn giữa thân và đổi góc nhìn để chỉnh chiều sâu.`,
-    "Chơi ván mới →",
+    t("ALL 3 ATTEMPTS USED", "HẾT 3 LƯỢT"),
+    game.score ? t("You brought bears home!", "Gấu đã về với bạn!") : t("Almost there…", "Suýt được rồi…"),
+    t(`You brought home ${game.score}/3 bears. Off-center grabs are weak; aim at the body center and switch views to adjust depth.`, `Bạn mang về ${game.score}/3 gấu. Gắp lệch sẽ yếu; thử căn giữa thân và đổi góc nhìn để chỉnh chiều sâu.`),
+    t("New round →", "Chơi ván mới →"),
   );
   tone(game.score ? 780 : 170);
 }
@@ -228,17 +230,17 @@ $("grab").addEventListener("click", () => {
 $("pause").addEventListener("click", togglePause);
 $("view").addEventListener("click", () => {
   rightView = !rightView;
-  $("view").textContent = rightView ? "Góc nhìn: phải ↔" : "Góc nhìn: trái ↔";
+  $("view").textContent = rightView ? t("View: right ↔", "Góc nhìn: phải ↔") : t("View: left ↔", "Góc nhìn: trái ↔");
   resize();
   $("view").blur();
 });
 $("sound").addEventListener("click", () => {
   muted = !muted;
-  $("sound").textContent = muted ? "♪ Âm thanh: tắt" : "♪ Âm thanh: bật";
+  $("sound").textContent = muted ? t("♪ Sound: off", "♪ Âm thanh: tắt") : t("♪ Sound: on", "♪ Âm thanh: bật");
   $("sound").setAttribute("aria-pressed", String(!muted));
   $("sound").setAttribute(
     "aria-label",
-    muted ? "Bật âm thanh" : "Tắt âm thanh",
+    muted ? t("Enable sound", "Bật âm thanh") : t("Mute sound", "Tắt âm thanh"),
   );
   tone(520);
 });
@@ -356,10 +358,10 @@ function frame(now) {
   }
   marker.position.set(game.x, 0.05, game.z);
   marker.visible = game.stage === "aim";
-  $("attempts").textContent = `${game.attempts} LƯỢT`;
-  $("score").textContent = `${game.score} GẤU`;
+  $("attempts").textContent = t(`${game.attempts} ATTEMPTS`, `${game.attempts} LƯỢT`);
+  $("score").textContent = t(`${game.score} BEARS`, `${game.score} GẤU`);
   $("timer").textContent =
-    game.stage === "aim" ? `${Math.ceil(game.timer)} GIÂY CĂN` : "ĐANG GẮP";
+    game.stage === "aim" ? t(`${Math.ceil(game.timer)} SECONDS TO AIM`, `${Math.ceil(game.timer)} GIÂY CĂN`) : t("GRABBING", "ĐANG GẮP");
   $("tip").textContent = game.message;
   $("grab").disabled =
     game.phase !== "playing" || paused || game.stage !== "aim";
@@ -374,3 +376,5 @@ setupGameExit({
   isPaused: () => paused,
   togglePause,
 });
+
+setupLanguageUI(staticPairs);

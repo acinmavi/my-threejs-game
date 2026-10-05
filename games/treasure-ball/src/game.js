@@ -1,3 +1,4 @@
+import { t } from "../../../src/i18n.js";
 import * as CANNON from "cannon-es";
 export const MAX_PIECES = 180;
 export const SMALL_RADIUS = 0.2;
@@ -24,9 +25,9 @@ export const BONUS_REWARDS = [
   { kind: "points", amount: 500 },
 ];
 export function rewardLabel(reward) {
-  if (reward.kind === "none") return "TRỐNG";
-  if (reward.kind === "key") return "CHÌA KHÓA";
-  return `${reward.amount} ${{ small: "BÓNG NHỎ", big: "BÓNG LỚN", points: "ĐIỂM" }[reward.kind]}`;
+  if (reward.kind === "none") return t("EMPTY", "TRỐNG");
+  if (reward.kind === "key") return t("KEY", "CHÌA KHÓA");
+  return t(`${reward.amount} ${{ small: "SMALL BALLS", big: "BIG BALLS", points: "POINTS" }[reward.kind]}`, `${reward.amount} ${{ small: "BÓNG NHỎ", big: "BÓNG LỚN", points: "ĐIỂM" }[reward.kind]}`);
 }
 const TAU = Math.PI * 2;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -151,7 +152,7 @@ export function createGame(random = Math.random, populated = true) {
     spin: null,
     lastBonus: null,
     bonusWheel: 0,
-    message: "Căn vị trí rồi thả bóng qua bảng đinh. Bóng lớn mở vòng thưởng.",
+    message: t("Aim, then drop through the peg board. Big balls unlock the bonus wheel.", "Căn vị trí rồi thả bóng qua bảng đinh. Bóng lớn mở vòng thưởng."),
   };
   if (populated) {
     for (let row = 0; row < 7; row++)
@@ -216,7 +217,7 @@ export function shoot(game) {
   if (game.tokens === 0) game.phase = "over";
   game.shots++;
   game.cooldown = 0.65;
-  game.message = "Bóng đang qua bảng đinh… chờ ô thưởng bên dưới.";
+  game.message = t("The ball is crossing the peg board… wait for the reward channel below.", "Bóng đang qua bảng đinh… chờ ô thưởng bên dưới.");
   return true;
 }
 function queueBalls(game, kind, amount, aim = game.aim) {
@@ -239,11 +240,11 @@ function resolveChannel(game, ball) {
       game.chests++;
       game.score += 200;
       queueBalls(game, "big", 1);
-      game.message = "MỞ RƯƠNG! +200 điểm và 1 bóng lớn xuống bàn.";
+      game.message = t("CHEST OPEN! +200 points and 1 big ball onto the table.", "MỞ RƯƠNG! +200 điểm và 1 bóng lớn xuống bàn.");
       return;
     }
   }
-  game.message = `Plinko: ${rewardLabel(reward)}. Bóng thả ban đầu cũng xuống bàn đẩy.`;
+  game.message = t(`Plinko: ${rewardLabel(reward)}. The original ball also lands on the pusher.`, `Plinko: ${rewardLabel(reward)}. Bóng thả ban đầu cũng xuống bàn đẩy.`);
 }
 function collect(game, piece) {
   const pos = piece.body.position;
@@ -254,13 +255,13 @@ function collect(game, piece) {
   if (piece.kind === "small") {
     game.frontSmall++;
     game.score += 2;
-    game.message = "Bóng nhỏ cửa trước: +2 điểm. Credit không tăng.";
+    game.message = t("Front small ball: +2 points. Credits do not refill.", "Bóng nhỏ cửa trước: +2 điểm. Credit không tăng.");
   } else {
     game.frontBig++;
     game.score += 10;
     game.bonuses.push(false);
     if (game.frontBig % 6 === 0) game.bonuses.push(true);
-    game.message = "Bóng lớn đã rơi! Vòng thưởng đang khởi động.";
+    game.message = t("Big ball collected! The bonus wheel is starting.", "Bóng lớn đã rơi! Vòng thưởng đang khởi động.");
   }
 }
 function dispense(game, dt) {

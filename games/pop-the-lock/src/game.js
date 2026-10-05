@@ -1,9 +1,10 @@
+import { t } from '../../../src/i18n.js';
 const TAU = Math.PI * 2;
 export const MODES = {
-  easy: { label: 'Dễ', acceleration: .0075 },
-  normal: { label: 'Thường', acceleration: .02 },
-  hard: { label: 'Khó', acceleration: .04 },
-  extreme: { label: 'Siêu khó', acceleration: .08 },
+  easy: { label: t("Easy", "Dễ"), acceleration: .0075 },
+  normal: { label: t("Normal", "Thường"), acceleration: .02 },
+  hard: { label: t("Hard", "Khó"), acceleration: .04 },
+  extreme: { label: t("Extreme", "Siêu khó"), acceleration: .08 },
 };
 export function createGame(level = 1, random = Math.random, { mode = 'normal', elapsed = 0, style = 'endless' } = {}) {
   if (!MODES[mode]) mode = 'normal';

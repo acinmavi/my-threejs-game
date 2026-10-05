@@ -1,3 +1,5 @@
+import { t, setupLanguageUI } from '../../../src/i18n.js';
+import { staticPairs } from './translations.js';
 import { setupGameExit } from '../../../src/exit-dialog.js';
 import * as THREE from 'three';
 import './style.css';
@@ -163,21 +165,21 @@ function start() {
   game = createGame(selectedMode); game.phase = 'playing'; paused = false; accumulator = 0; cameraRow = 0; facing = 0;
   for (const view of laneMeshes.values()) scene.remove(view.group); laneMeshes.clear(); syncWorld();
   $('overlay').hidden = true; $('score').textContent = '0'; $('pause').disabled = false;
-  $('pause').textContent = 'Ⅱ'; $('pause').setAttribute('aria-label', 'Tạm dừng');
-  $('tip').textContent = 'Nhìn xe trước khi nhảy!';
+  $('pause').textContent = 'Ⅱ'; $('pause').setAttribute('aria-label', t("Pause", "Tạm dừng"));
+  $('tip').textContent = t("Check traffic before hopping!", "Nhìn xe trước khi nhảy!");
 }
 function hop(dx, dr) {
   if (paused || game.phase !== 'playing') return;
   if (move(game, dx, dr)) {
     facing = Math.atan2(-dx, dr); tone(520);
-    $('tip').textContent = game.score < 3 ? 'Nhìn xe trước khi nhảy!' : 'Tiến lên — mỗi hàng mới thêm một điểm.';
+    $('tip').textContent = game.score < 3 ? t("Check traffic before hopping!", "Nhìn xe trước khi nhảy!") : t("Keep going — each new row earns a point.", "Tiến lên — mỗi hàng mới thêm một điểm.");
   }
 }
 function togglePause() {
   if (game.phase !== 'playing') return;
   document.activeElement?.blur(); paused = !paused; accumulator = 0;
-  $('pause').textContent = paused ? '▶' : 'Ⅱ'; $('pause').setAttribute('aria-label', paused ? 'Tiếp tục' : 'Tạm dừng');
-  if (paused) card('DỪNG LẠI MỘT CHÚT', 'Không cần vội.', 'Xe cũng tạm dừng. Tiếp tục khi bạn sẵn sàng.', 'Tiếp tục đi', 'P / NÚT TIẾP TỤC ĐỂ CHƠI TIẾP');
+  $('pause').textContent = paused ? '▶' : 'Ⅱ'; $('pause').setAttribute('aria-label', paused ? t("Resume", "Tiếp tục") : t("Pause", "Tạm dừng"));
+  if (paused) card(t("TAKE A BREAK", "DỪNG LẠI MỘT CHÚT"), t("No rush.", "Không cần vội."), t("Traffic is paused too. Resume when you are ready.", "Xe cũng tạm dừng. Tiếp tục khi bạn sẵn sàng."), t("Resume crossing", "Tiếp tục đi"), t("P / RESUME TO CONTINUE", "P / NÚT TIẾP TỤC ĐỂ CHƠI TIẾP"));
   else $('overlay').hidden = true;
 }
 function endRun() {
@@ -185,12 +187,12 @@ function endRun() {
   try { localStorage.setItem('crossy-sky-best', String(best)); } catch {}
   $('best').textContent = String(best).padStart(2, '0'); $('pause').disabled = true;
   $('flash').classList.remove('hit'); void $('flash').offsetWidth; $('flash').classList.add('hit');
-  const messages = { car: ['Ối, gặp xe rồi!', 'Nhìn hai bên trước khi qua đường nhé.'], water: ['Tõm! Rơi xuống sông.', 'Nhảy lên khúc gỗ và đừng trôi ra ngoài bờ.'], train: ['Tàu chạy qua rồi!', 'Đèn đỏ báo tàu tới — đợi tàu đi qua nhé.'], camera: ['Bạn bị bỏ lại rồi!', 'Camera kéo dần. Đừng đứng yên quá lâu nhé.'] };
+  const messages = { car: [t("Oops, a car!", "Ối, gặp xe rồi!"), t("Look both ways before crossing.", "Nhìn hai bên trước khi qua đường nhé.")], water: [t("Splash! Into the river.", "Tõm! Rơi xuống sông."), t("Hop onto a log and stay within the banks.", "Nhảy lên khúc gỗ và đừng trôi ra ngoài bờ.")], train: [t("The train got you!", "Tàu chạy qua rồi!"), t("Red lights mean a train is coming — wait for it to pass.", "Đèn đỏ báo tàu tới — đợi tàu đi qua nhé.")], camera: [t("You fell behind!", "Bạn bị bỏ lại rồi!"), t("The camera moves forward. Keep moving.", "Camera kéo dần. Đừng đứng yên quá lâu nhé.")] };
   const [title, advice] = messages[game.reason] ?? messages.car;
   $('tip').textContent = advice;
-  card(record ? 'KỶ LỤC MỚI!' : 'THỬ THÊM MỘT CHUYẾN?', title, `Bạn đi được ${game.score} hàng. ${advice}`, 'Đi lần nữa', 'ENTER / NÚT ĐI LẦN NỮA ĐỂ CHƠI LẠI');
+  card(record ? t("NEW BEST!", "KỶ LỤC MỚI!") : t("ANOTHER JOURNEY?", "THỬ THÊM MỘT CHUYẾN?"), title, t(`You crossed ${game.score} rows. ${advice}`, `Bạn đi được ${game.score} hàng. ${advice}`), t("Cross again", "Đi lần nữa"), t("ENTER / CROSS AGAIN TO RESTART", "ENTER / NÚT ĐI LẦN NỮA ĐỂ CHƠI LẠI"));
 }
-const modeDescriptions = { easy: 'Nhịp chậm, khoảng trống rộng, 8 giây chuẩn bị.', normal: 'Xe nhanh từ đầu, đường rộng sớm, 5 giây chuẩn bị.', hard: 'Xe cực nhanh, cửa sổ qua đường ngắn, 3 giây chuẩn bị.', expert: 'Xe dồn dập, đường rộng sớm, chỉ 2 giây chuẩn bị.', extreme: 'Xe cực tốc, camera ép mạnh, chỉ 1.5 giây chuẩn bị.' };
+const modeDescriptions = { easy: t("Slow pace, wide gaps, 8 seconds to get ready.", "Nhịp chậm, khoảng trống rộng, 8 giây chuẩn bị."), normal: t("Fast traffic, wider roads early, 5 seconds to get ready.", "Xe nhanh từ đầu, đường rộng sớm, 5 giây chuẩn bị."), hard: t("Very fast traffic, short crossing windows, 3 seconds to get ready.", "Xe cực nhanh, cửa sổ qua đường ngắn, 3 giây chuẩn bị."), expert: t("Heavy traffic, wider roads early, only 2 seconds to get ready.", "Xe dồn dập, đường rộng sớm, chỉ 2 giây chuẩn bị."), extreme: t("Extreme traffic, strong camera pressure, only 1.5 seconds to get ready.", "Xe cực tốc, camera ép mạnh, chỉ 1.5 giây chuẩn bị.") };
 function updateMode() {
   selectedMode = $('mode').value;
   $('mode-description').textContent = modeDescriptions[selectedMode];
@@ -207,8 +209,8 @@ $('play').addEventListener('click', () => paused ? togglePause() : start());
 $('pause').addEventListener('click', togglePause);
 $('sound').addEventListener('click', () => {
   $('sound').blur(); muted = !muted;
-  $('sound').querySelector('span').textContent = `Âm thanh: ${muted ? 'tắt' : 'bật'}`;
-  $('sound').setAttribute('aria-pressed', String(!muted)); $('sound').setAttribute('aria-label', muted ? 'Bật âm thanh' : 'Tắt âm thanh'); tone(850);
+  $('sound').querySelector('span').textContent = muted ? t('Sound: off', 'Âm thanh: tắt') : t('Sound: on', 'Âm thanh: bật');
+  $('sound').setAttribute('aria-pressed', String(!muted)); $('sound').setAttribute('aria-label', muted ? t("Enable sound", "Bật âm thanh") : t("Mute sound", "Tắt âm thanh")); tone(850);
 });
 const directions = { ArrowUp:[0,1], KeyW:[0,1], ArrowDown:[0,-1], KeyS:[0,-1], ArrowLeft:[-1,0], KeyA:[-1,0], ArrowRight:[1,0], KeyD:[1,0], Space:[0,1] };
 window.addEventListener('keydown', event => {
@@ -264,12 +266,12 @@ renderer.setAnimationLoop(time => {
   if (!paused) cameraRow += (game.cameraRow - cameraRow) * (1 - Math.exp(-dt * 6));
   const lag = game.cameraRow - p.row;
   const level = difficulty(game.score, game.mode);
-  $('difficulty').textContent = `${DIFFICULTIES[game.mode].label.toUpperCase()} · CẤP ${level.level} · ĐƯỜNG ${level.roadWidth} LÀN · XE ${level.speedMultiplier.toFixed(2)}×`;
-  $('pressure').textContent = game.time < DIFFICULTIES[game.mode].grace ? `CHUẨN BỊ: ${Math.ceil(DIFFICULTIES[game.mode].grace - game.time)} GIÂY` : lag > 2.2 ? '⚠ TIẾN LÊN — SẮP BỊ BỎ LẠI' : '↑ CAMERA ĐANG KÉO';
+  $('difficulty').textContent = t(`${DIFFICULTIES[game.mode].label.toUpperCase()} · LEVEL ${level.level} · ${level.roadWidth} ROAD LANES · TRAFFIC ${level.speedMultiplier.toFixed(2)}×`, `${DIFFICULTIES[game.mode].label.toUpperCase()} · CẤP ${level.level} · ĐƯỜNG ${level.roadWidth} LÀN · XE ${level.speedMultiplier.toFixed(2)}×`);
+  $('pressure').textContent = game.time < DIFFICULTIES[game.mode].grace ? t(`GET READY: ${Math.ceil(DIFFICULTIES[game.mode].grace - game.time)} SECONDS`, `CHUẨN BỊ: ${Math.ceil(DIFFICULTIES[game.mode].grace - game.time)} GIÂY`) : lag > 2.2 ? t("⚠ MOVE FORWARD — FALLING BEHIND", "⚠ TIẾN LÊN — SẮP BỊ BỎ LẠI") : t("↑ CAMERA MOVING FORWARD", "↑ CAMERA ĐANG KÉO");
   $('pressure').classList.toggle('urgent', lag > 2.2);
   if (game.phase === 'playing' && !paused) {
     const nearbyTrain = [...game.lanes.values()].find(lane => lane.type === 'train' && lane.row >= p.row && lane.row - p.row < 4 && (trainState(lane, game.time).warning || trainState(lane, game.time).active));
-    $('tip').textContent = lag > 2.2 ? 'Tiến lên! Vạch đỏ sắp tới rồi.' : nearbyTrain ? '⚠ Tàu sắp tới — đợi ở bãi cỏ!' : onRiver ? 'Khúc gỗ đang trôi — đừng ra khỏi bờ!' : 'Né xe · Nhảy lên gỗ · Chú ý đèn tàu';
+    $('tip').textContent = lag > 2.2 ? t("Move forward! The red line is catching up.", "Tiến lên! Vạch đỏ sắp tới rồi.") : nearbyTrain ? t("⚠ Train approaching — wait on the grass!", "⚠ Tàu sắp tới — đợi ở bãi cỏ!") : onRiver ? t("The log is drifting — stay within the banks!", "Khúc gỗ đang trôi — đừng ra khỏi bờ!") : t("Dodge cars · Ride logs · Watch train lights", "Né xe · Nhảy lên gỗ · Chú ý đèn tàu");
   }
   const focus = -cameraRow - 2.5;
   camera.position.set(8, 11, focus + 12); camera.lookAt(0, 0, focus);
@@ -278,3 +280,5 @@ renderer.setAnimationLoop(time => {
 });
 
 setupGameExit({ isPlaying: () => game.phase === 'playing', isPaused: () => paused, togglePause });
+
+setupLanguageUI(staticPairs);
