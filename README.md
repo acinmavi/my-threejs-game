@@ -17,10 +17,10 @@ Open http://127.0.0.1:5175/. Home lists all games and browser-local best scores.
 - **Crossy 3D** (`/games/crossy-three/`): dodge traffic, cross rivers and wait for trains while the camera pushes you forward. Five difficulties. WASD, arrow keys or swipe.
 - **Pop the Lock** (`/games/pop-the-lock/`): hit the target and reverse direction. Endless is the default; level-based play is also available. Space, click or tap.
 - **Claw Club** (`/games/claw-machine/`): a challenging 3D claw machine with three grabs per round and 20 seconds to aim. WASD or touch controls to move; Space to grab.
-- **Infinity Pusher** (`/games/coin-pusher/`): 50 credits per round, a target wheel awarding 1–15 coins, and a two-tier Cannon ES pusher. Every 50 points from collected coins creates a stone. Each stone triggers a Bonus Spin; six stones trigger a Jackpot. A/D, arrows or the slider to aim; Space or tap to shoot.
-- **Treasure Ball** (`/games/treasure-ball/`): a physical Plinko pegboard, white and gold balls, bonus spins and three-key treasure chests. 50 credits per round. A/D or the slider to aim; Space or tap to drop.
+- **Infinity Pusher** (`/games/coin-pusher/`): 30 credits per round, a target wheel awarding 1–15 coins, and a two-tier Cannon ES pusher. Every 50 points from collected coins creates a stone. Each stone triggers a Bonus Spin; six stones trigger a Jackpot. A/D, arrows or the slider to aim; Space or tap to shoot.
+- **Treasure Ball** (`/games/treasure-ball/`): a physical Plinko pegboard, white and gold balls, bonus spins and three-key treasure chests. 30 credits per round. A/D or the slider to aim; Space or tap to drop.
 
-Both pusher games end immediately at zero credits, stopping the pusher and pending rewards. Collected pieces award points, not credits.
+At zero credits, both pusher games stop accepting shots but finish the last shot and pending rewards. The pusher then completes its final cycles and lets falling pieces settle before showing game over. Collected pieces award points, not credits. Infinity Pusher uses coins and stones enlarged by 40% with a smaller starting pile to reduce physics load.
 
 ## Language and navigation
 

@@ -25,6 +25,7 @@ let game = createGame(),
   muted = true,
   audio;
 const keys = new Set();
+const isActive = () => ["playing", "settling"].includes(game.phase);
 try {
   best = Number(localStorage.getItem("treasure-ball-best")) || 0;
 } catch {}
@@ -174,12 +175,12 @@ const smallGeometry = new THREE.SphereGeometry(SMALL_RADIUS, 12, 8),
 const smallBalls = new THREE.InstancedMesh(
   smallGeometry,
   mat("#fff8e6"),
-  MAX_PIECES,
+  MAX_PIECES + 1,
 );
 const bigBalls = new THREE.InstancedMesh(
   bigGeometry,
   mat("#e6b347", true),
-  MAX_PIECES,
+  MAX_PIECES + 1,
 );
 for (const mesh of [smallBalls, bigBalls]) {
   mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -284,7 +285,7 @@ function start() {
   document.activeElement?.blur();
 }
 function togglePause() {
-  if (game.phase !== "playing") return;
+  if (!isActive()) return;
   paused = !paused;
   last = 0;
   accumulator = 0;
@@ -358,7 +359,7 @@ window.addEventListener("keydown", (event) => {
 window.addEventListener("keyup", (event) => keys.delete(event.code));
 window.addEventListener("blur", clearInput);
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden && game.phase === "playing" && !paused) togglePause();
+  if (document.hidden && isActive() && !paused) togglePause();
   clearInput();
   last = 0;
 });
@@ -380,9 +381,9 @@ resize();
 function frame(now) {
   const dt = last ? Math.min((now - last) / 1000, 0.075) : 0;
   last = now;
-  if (game.phase === "playing" && !paused) {
+  if (isActive() && !paused) {
     accumulator += dt;
-    while (accumulator >= 1 / 60 && game.phase === "playing") {
+    while (accumulator >= 1 / 60 && isActive()) {
       const direction =
         (keys.has("ArrowRight") || keys.has("KeyD") ? 1 : 0) -
         (keys.has("ArrowLeft") || keys.has("KeyA") ? 1 : 0);
@@ -471,6 +472,8 @@ function frame(now) {
     game.plinkoBalls.length >= 6;
   if (game.phase === "playing" && game.pieces.length >= MAX_PIECES)
     $("tip").textContent = t("The table is full. Wait for balls to fall off the ledge before dropping more.", "Bàn đang đầy. Chờ bóng rơi xuống mép rồi thả tiếp.");
+  if (game.phase === "settling")
+    $("tip").textContent = t("No credits left. Finishing the last ball and queued rewards…", "Hết credit. Đang xử lý bóng cuối và phần thưởng còn lại…");
   if (game.phase === "over")
     $("tip").textContent = t("Out of credits. The pusher and rewards have stopped.", "Hết credit. Bàn đẩy và phần thưởng đã dừng.");
   renderer.render(scene, camera);
@@ -478,7 +481,7 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 setupGameExit({
-  isPlaying: () => game.phase === "playing",
+  isPlaying: isActive,
   isPaused: () => paused,
   togglePause,
 });

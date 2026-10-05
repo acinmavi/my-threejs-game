@@ -9,6 +9,9 @@ import {
   setAim,
   COLORS,
   MAX_PIECES,
+  COIN_RADIUS,
+  COIN_HEIGHT,
+  STONE_RADIUS,
   STONE_THRESHOLD,
   WHEEL_VALUES,
   wheelAward,
@@ -263,11 +266,11 @@ const aimLine = new THREE.Mesh(
 aimLine.rotation.x = -Math.PI / 2;
 aimLine.position.set(0, 0.045, -0.25);
 scene.add(aimLine);
-const coinGeometry = new THREE.CylinderGeometry(0.2, 0.2, 0.075, 16);
+const coinGeometry = new THREE.CylinderGeometry(COIN_RADIUS, COIN_RADIUS, COIN_HEIGHT, 16);
 const coins = new THREE.InstancedMesh(
   coinGeometry,
   mat("#dbb152", true),
-  MAX_PIECES,
+  MAX_PIECES + 1,
 );
 coins.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 coins.castShadow = true;
@@ -275,7 +278,7 @@ coins.receiveShadow = true;
 coins.frustumCulled = false;
 scene.add(coins);
 const gems = new Map();
-const gemGeometry = new THREE.IcosahedronGeometry(0.25, 0);
+const gemGeometry = new THREE.IcosahedronGeometry(STONE_RADIUS, 0);
 const transform = new THREE.Object3D();
 function tone(freq) {
   if (muted) return;
@@ -318,7 +321,7 @@ function start() {
   document.activeElement?.blur();
 }
 function togglePause() {
-  if (game.phase !== "playing") return;
+  if (!["playing", "settling"].includes(game.phase)) return;
   paused = !paused;
   last = 0;
   accumulator = 0;
@@ -351,7 +354,7 @@ function finish() {
   card(
     t("OUT OF CREDITS", "HẾT CREDIT"),
     t("Game over.", "Kết thúc ván."),
-    t(`${game.score} points · ${game.collected} stones · ${game.shots} coins fired. Time the reward sectors and avoid side gaps to play longer.`, `${game.score} điểm · ${game.collected} đá · ${game.shots} xu đã bắn. Căn ô thưởng trên vòng quay và tránh khe hai bên để chơi lâu hơn.`),
+    t(`${game.score} points · ${game.collected} stones · ${game.shots} coins fired. All 30 credits and their reward chains are complete.`, `${game.score} điểm · ${game.collected} đá · ${game.shots} xu đã bắn. Đã dùng hết 30 credit và hoàn tất chuỗi phần thưởng.`),
     t("New round →", "Chơi ván mới →"),
   );
   tone(180);
@@ -392,7 +395,7 @@ window.addEventListener("keydown", (event) => {
 window.addEventListener("keyup", (event) => keys.delete(event.code));
 window.addEventListener("blur", clearInput);
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden && game.phase === "playing" && !paused) togglePause();
+  if (document.hidden && ["playing", "settling"].includes(game.phase) && !paused) togglePause();
   clearInput();
   last = 0;
 });
@@ -414,9 +417,9 @@ resize();
 function frame(now) {
   const dt = last ? Math.min((now - last) / 1000, 0.075) : 0;
   last = now;
-  if (game.phase === "playing" && !paused) {
+  if (["playing", "settling"].includes(game.phase) && !paused) {
     accumulator += dt;
-    while (accumulator >= 1 / 60 && game.phase === "playing") {
+    while (accumulator >= 1 / 60 && ["playing", "settling"].includes(game.phase)) {
       const direction =
         (keys.has("ArrowRight") || keys.has("KeyD") ? 1 : 0) -
         (keys.has("ArrowLeft") || keys.has("KeyA") ? 1 : 0);
@@ -504,7 +507,7 @@ function frame(now) {
   }
   $("bonus").textContent =
     game.phase === "over"
-      ? t("OUT OF CREDITS · REWARDS STOPPED", "HẾT CREDIT · THƯỞNG ĐÃ DỪNG")
+      ? t("OUT OF CREDITS · REWARDS COMPLETE", "HẾT CREDIT · THƯỞNG ĐÃ XONG")
       : game.spin
         ? t(`${game.spin.reward.superBonus ? "SUPER BONUS ×3" : "STONE → BONUS SPIN"} 🎡 · SPINNING`, `${game.spin.reward.superBonus ? "SUPER BONUS ×3" : "ĐÁ → BONUS SPIN"} 🎡 · ĐANG QUAY`)
         : game.lastBonus
@@ -537,14 +540,16 @@ function frame(now) {
   if (game.phase === "playing" && game.pieces.length >= MAX_PIECES)
     $("tip").textContent =
       t("The coin table is full. Wait for the pusher to move coins off before firing.", "Bàn xu đang đầy. Chờ bàn đẩy dồn xu xuống rồi bắn tiếp.");
+  if (game.phase === "settling")
+    $("tip").textContent = t("Last shot fired. Finishing payouts, bonus spins and final pushes…", "Đã bắn xu cuối. Đang hoàn tất xu thưởng, vòng bonus và lượt đẩy cuối…");
   if (game.phase === "over")
-    $("tip").textContent = t("Out of credits. The pusher and rewards have stopped.", "Hết credit. Bàn đẩy và phần thưởng đã dừng.");
+    $("tip").textContent = t("All rewards are complete. Start a new 30-credit round.", "Đã hoàn tất phần thưởng. Bắt đầu ván mới với 30 credit.");
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
 setupGameExit({
-  isPlaying: () => game.phase === "playing",
+  isPlaying: () => ["playing", "settling"].includes(game.phase),
   isPaused: () => paused,
   togglePause,
 });

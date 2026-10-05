@@ -24,7 +24,13 @@ export function bonusLabel(reward) {
 }
 export const FRONT = 2.55;
 export const SIDE = 2.55;
-export const MAX_PIECES = 260;
+export const MAX_PIECES = 160;
+export const COIN_RADIUS = 0.28;
+export const COIN_HEIGHT = 0.105;
+export const STONE_RADIUS = 0.35;
+export const PUSHER_CYCLE = 3.8;
+export const FINAL_PUSH_TIME = 8;
+export const FINAL_FALL_TIME = 2;
 export const STONE_THRESHOLD = 50;
 export const SHOT_DELAY = 0.7;
 export const UPPER_Y = 0.6;
@@ -38,11 +44,11 @@ function fixedBox(world, half, position, material, type = CANNON.Body.STATIC) {
   return body;
 }
 export function addPiece(game, kind, x, y, z, stone = -1) {
-  if (game.pieces.length >= MAX_PIECES) return null;
+  if (game.pieces.length >= MAX_PIECES + (game.phase === "settling" ? 1 : 0)) return null;
   const shape =
     kind === "coin"
-      ? new CANNON.Cylinder(0.2, 0.2, 0.075, 8)
-      : new CANNON.Sphere(0.25);
+      ? new CANNON.Cylinder(COIN_RADIUS, COIN_RADIUS, COIN_HEIGHT, 8)
+      : new CANNON.Sphere(STONE_RADIUS);
   const body = new CANNON.Body({
     mass: kind === "coin" ? 1 : 2.2,
     material: game.material,
@@ -101,7 +107,10 @@ export function createGame(random = Math.random, populated = true) {
     nextId: 0,
     random,
     phase: "ready",
-    tokens: 50,
+    tokens: 30,
+    quietTime: 0,
+    fallTime: 0,
+    pusherStopped: false,
     score: 0,
     shots: 0,
     lost: 0,
@@ -128,35 +137,20 @@ export function createGame(random = Math.random, populated = true) {
       t("Fire through the wheel. Reward coins fall onto the upper shelf and push down to the lower table.", "Thả xu qua vòng quay. Xu thưởng rơi lên bàn trên rồi đẩy xuống bàn dưới."),
   };
   if (populated) {
-    game.initialCoins = 156 + Math.floor(random() * 25);
-    // Keep the front ledge populated without deep, expensive stacks.
-    for (let row = 0; row < 8; row++)
-      for (let col = 0; col < 12; col++)
-        addPiece(
-          game,
-          "coin",
-          (col - 5.5) * 0.39 + (random() - 0.5) * 0.03,
-          0.055,
-          -0.15 + row * 0.38 + (random() - 0.5) * 0.025,
-        );
-    for (let row = 0; row < 4; row++)
-      for (let col = 0; col < 12; col++)
-        addPiece(
-          game,
-          "coin",
-          (col - 5.5) * 0.39 + (random() - 0.5) * 0.02,
-          UPPER_Y + 0.055,
-          -2.52 + row * 0.35,
-        );
-    for (let i = 144; i < game.initialCoins; i++)
-      addPiece(
-        game,
-        "coin",
-        (random() - 0.5) * 4.2,
-        0.17 + Math.floor((i - 144) / 35) * 0.08,
-        -0.5 + random() * 2.9,
-      );
-    const initialStones = 4 + Math.floor(random() * 2);
+    game.initialCoins = 80 + Math.floor(random() * 16);
+    // Larger tokens need wider spacing; both tiers and the front ledge remain populated.
+    for (let row = 0; row < 6; row++)
+      for (let col = 0; col < 8; col++)
+        addPiece(game, "coin", (col - 3.5) * 0.58 + (random() - 0.5) * 0.02,
+          COIN_HEIGHT / 2 + 0.01, -0.22 + row * 0.56);
+    for (let row = 0; row < 3; row++)
+      for (let col = 0; col < 8; col++)
+        addPiece(game, "coin", (col - 3.5) * 0.58,
+          UPPER_Y + COIN_HEIGHT / 2 + 0.01, -2.48 + row * 0.55);
+    for (let i = 72; i < game.initialCoins; i++)
+      addPiece(game, "coin", (random() - 0.5) * 3.8,
+        0.2 + Math.floor((i - 72) / 16) * COIN_HEIGHT, -0.3 + random() * 2.7);
+    const initialStones = 2 + Math.floor(random() * 2);
     for (let i = 0; i < initialStones; i++)
       addPiece(
         game,
@@ -190,7 +184,10 @@ export function shoot(game) {
   )
     return false;
   game.tokens--;
-  if (game.tokens === 0) game.phase = "over";
+  if (game.tokens === 0) {
+    game.phase = "settling";
+    resetCompletion(game);
+  }
   game.shots++;
   game.cooldown = SHOT_DELAY;
   game.flights.push({ id: game.nextFlight++, age: 0, aim: game.aim });
@@ -198,7 +195,13 @@ export function shoot(game) {
     t("The coin is flying through the wheel… the winning sector sets the coin payout.", "Xu đang đi qua vòng quay… ô trúng quyết định số xu rơi lên bàn đẩy.");
   return true;
 }
+function resetCompletion(game) {
+  game.quietTime = 0;
+  game.fallTime = 0;
+  game.pusherStopped = false;
+}
 function collect(game, piece, front) {
+  resetCompletion(game);
   if (!front) {
     game.lost++;
     game.message = t("Side gap: item lost.", "Rơi khe bên: mất vật phẩm.");
@@ -226,7 +229,7 @@ function collect(game, piece, front) {
 }
 function dispense(game, dt) {
   game.dropCooldown = Math.max(0, game.dropCooldown - dt);
-  if (game.dropCooldown > 0 || game.pieces.length >= MAX_PIECES) return;
+  if (game.dropCooldown > 0 || game.pieces.length >= MAX_PIECES + (game.phase === "settling" ? 1 : 0)) return;
   if (game.pendingStones) {
     addPiece(
       game,
@@ -255,10 +258,10 @@ function dispense(game, dt) {
   }
 }
 export function step(game, dt) {
-  if (game.phase !== "playing" || dt <= 0) return;
-  if (game.tokens <= 0) {
-    game.phase = "over";
-    return;
+  if (!["playing", "settling"].includes(game.phase) || dt <= 0) return;
+  if (game.tokens <= 0 && game.phase === "playing") {
+    game.phase = "settling";
+    resetCompletion(game);
   }
   game.time += dt;
   game.cooldown = Math.max(0, game.cooldown - dt);
@@ -268,6 +271,7 @@ export function step(game, dt) {
     flight.age += dt;
     if (flight.age >= 0.6) {
       const award = wheelAward(game.wheel);
+      resetCompletion(game);
       game.lastWheel = award;
       // The fired token falls onto the shelf too; the wheel award is additional.
       game.pendingCoins += award + 1;
@@ -277,8 +281,8 @@ export function step(game, dt) {
     }
   }
   dispense(game, dt);
-  const targetZ = -2.3 + (0.8 * (1 - Math.cos((game.time * TAU) / 3.8))) / 2;
-  game.pusher.velocity.z = (targetZ - game.pusher.position.z) / dt;
+  const targetZ = -2.3 + (0.8 * (1 - Math.cos((game.time * TAU) / PUSHER_CYCLE))) / 2;
+  game.pusher.velocity.z = game.pusherStopped ? 0 : (targetZ - game.pusher.position.z) / dt;
   // Every layer must wake so force can propagate to the front, not stop at sleeping bodies.
   if (game.pusher.velocity.z > 0)
     for (const piece of game.pieces) piece.body.wakeUp();
@@ -314,6 +318,7 @@ export function step(game, dt) {
     game.bonusWheel =
       spin.start + (spin.end - spin.start) * (1 - (1 - progress) ** 3);
     if (progress === 1) {
+      resetCompletion(game);
       const reward = spin.reward;
       if (reward.kind === "coins") {
         game.pendingCoins += reward.amount;
@@ -325,4 +330,20 @@ export function step(game, dt) {
       game.spin = null;
     }
   }
+  if (game.phase === "settling") {
+    const pending = game.flights.length || game.rewards.length || game.pendingCoins ||
+      game.pendingStones || game.bonuses.length || game.spin;
+    if (pending) resetCompletion(game);
+    else if (!game.pusherStopped) {
+      game.quietTime += dt;
+      if (game.quietTime >= FINAL_PUSH_TIME) {
+        game.pusherStopped = true;
+        game.pusher.velocity.set(0, 0, 0);
+      }
+    } else {
+      game.fallTime += dt;
+      if (game.fallTime >= FINAL_FALL_TIME) game.phase = "over";
+    }
+  }
+
 }

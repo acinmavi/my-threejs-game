@@ -10,6 +10,9 @@ import {
   WHEEL_VALUES,
   MAX_PIECES,
   UPPER_Y,
+  COIN_RADIUS,
+  COIN_HEIGHT,
+  STONE_RADIUS,
 } from "../src/game.js";
 const fresh = () => {
   const g = createGame(() => 0.5, false);
@@ -29,16 +32,16 @@ function seeded() {
   };
 }
 
-test("round starts lighter with 50 credits, 156–180 coins and four or five stones", () => {
+test("round starts lighter with 30 credits, 80–95 coins and two or three stones", () => {
   const g = createGame(seeded());
-  assert.equal(g.tokens, 50);
+  assert.equal(g.tokens, 30);
   assert.equal(g.phase, "ready");
-  assert.ok(g.initialCoins >= 156 && g.initialCoins <= 180);
-  assert.ok([4, 5].includes(g.pieces.filter((p) => p.kind === "stone").length));
-  assert.equal(MAX_PIECES, 260);
+  assert.ok(g.initialCoins >= 80 && g.initialCoins <= 95);
+  assert.ok([2, 3].includes(g.pieces.filter((p) => p.kind === "stone").length));
+  assert.equal(MAX_PIECES, 160);
   assert.ok(
     g.pieces.filter((p) => p.kind === "coin" && p.body.position.y > 0.5)
-      .length >= 30,
+      .length >= 16,
   );
   for (const p of g.pieces) assert.ok(Number.isFinite(p.body.position.y));
   step(g, 1);
@@ -47,7 +50,7 @@ test("round starts lighter with 50 credits, 156–180 coins and four or five sto
 test("one credit shoots one visible token; cooldown and empty balance reject extra shots", () => {
   const g = fresh();
   assert.equal(shoot(g), true);
-  assert.equal(g.tokens, 49);
+  assert.equal(g.tokens, 29);
   assert.equal(g.flights.length, 1);
   assert.equal(g.pieces.length, 0);
   assert.equal(shoot(g), false);
@@ -72,7 +75,7 @@ test("15-sector produces exactly fifteen reward coins plus the original fired to
   shoot(g);
   advance(g, 0.6);
   assert.equal(g.lastWheel, 15);
-  assert.equal(g.tokens, 49);
+  assert.equal(g.tokens, 29);
   assert.equal(
     g.pendingCoins + g.pieces.filter((p) => p.kind === "coin").length,
     16,
@@ -97,7 +100,7 @@ test("front coin rewards exactly once and side losses do not advance stone progr
   fall(g);
   step(g, 1 / 60);
   assert.equal(g.score, 1);
-  assert.equal(g.tokens, 50);
+  assert.equal(g.tokens, 30);
   assert.equal(g.frontCoins, 1);
   step(g, 1 / 60);
   assert.equal(g.score, 1);
@@ -141,10 +144,10 @@ test("each stone queues its own wheel, with coins, stones or points and no credi
     step(g, 1 / 60);
     assert.equal(g.collected, 1);
     assert.equal(g.spin.reward.kind, kind);
-    assert.equal(g.tokens, 50);
+    assert.equal(g.tokens, 30);
     advance(g, 2.5);
     assert.equal(g.lastBonus.amount, amount);
-    assert.equal(g.tokens, 50);
+    assert.equal(g.tokens, 30);
     if (kind === "coins")
       assert.equal(
         g.pendingCoins + g.pieces.filter((p) => p.kind === "coin").length,
@@ -169,15 +172,16 @@ test("any six stones queue six spins and a triple Super Bonus; side loss does no
   assert.equal(g.bonuses.length, 6);
   assert.equal(g.score, 220);
   advance(g, 18);
-  assert.equal(g.tokens, 50);
+  assert.equal(g.tokens, 30);
   assert.equal(g.lastBonus.superBonus, true);
   assert.equal(g.lastBonus.amount, 150);
   assert.equal(g.score, 670);
   assert.equal(g.spin, null);
   assert.equal(g.bonuses.length, 0);
 });
-test("last credit ends immediately even with queued rain and bonus spins", () => {
+test("last credit completes its flight, payouts and bonus chain before ending", () => {
   const g = fresh();
+  g.random = () => 0.14;
   g.tokens = 1;
   g.pendingCoins = 12;
   g.rewards.push({ remaining: 12, aim: 0 });
@@ -185,24 +189,69 @@ test("last credit ends immediately even with queued rain and bonus spins", () =>
   g.bonuses.push(false);
   assert.ok(shoot(g));
   assert.equal(g.tokens, 0);
-  assert.equal(g.phase, "over");
-  const before = { time: g.time, score: g.score, pieces: g.pieces.length };
-  advance(g, 20);
-  assert.deepEqual(
-    { time: g.time, score: g.score, pieces: g.pieces.length },
-    before,
-  );
+  assert.equal(g.phase, "settling");
   assert.equal(shoot(g), false);
-  assert.equal(fresh().tokens, 50);
+  advance(g, 3);
+  assert.equal(g.flights.length, 0);
+  assert.equal(g.pendingCoins, 0);
+  assert.equal(g.pendingStones, 0);
+  assert.equal(g.lastBonus.kind, "points");
+  assert.equal(g.phase, "settling");
+  advance(g, 60);
+  assert.equal(g.phase, "over");
+  assert.equal(g.spin, null);
+  assert.equal(g.rewards.length, 0);
+  assert.equal(g.pusher.velocity.z, 0);
+  const time = g.time;
+  advance(g, 1);
+  assert.equal(g.time, time);
 });
-test("zero credits stop an already running pusher before pending rewards resolve", () => {
+test("zero credits allow pending stones and a late collection resets completion", () => {
   const g = fresh();
   g.tokens = 0;
   g.pendingStones = 1;
   step(g, 1 / 60);
+  assert.equal(g.phase, "settling");
+  assert.equal(g.generatedStones, 1);
+  advance(g, 8.1);
+  assert.equal(g.pusherStopped, true);
+  fall(g);
+  step(g, 1 / 60);
+  assert.equal(g.pusherStopped, false);
+  assert.equal(g.score, 1);
+  advance(g, 9);
+  assert.equal(g.phase, "settling");
+  advance(g, 2);
   assert.equal(g.phase, "over");
-  assert.equal(g.generatedStones, 0);
-  assert.equal(g.time, 0);
+});
+test("settling full table preserves payouts with one temporary overflow slot", () => {
+  const g = createGame(seeded());
+  g.phase = "settling";
+  g.tokens = 0;
+  while (g.pieces.length < MAX_PIECES)
+    addPiece(g, "coin", (g.random() - 0.5) * 4, 1.2 + g.random(), -1 + g.random() * 3);
+  g.pendingCoins = 8;
+  g.rewards.push({ remaining: 8, aim: 0 });
+  let peak = g.pieces.length;
+  for (let i = 0; i < 120 * 60 && g.phase !== "over"; i++) {
+    step(g, 1 / 60);
+    peak = Math.max(peak, g.pieces.length);
+  }
+  assert.ok(peak <= MAX_PIECES + 1);
+  assert.equal(g.pendingCoins, 0);
+  assert.equal(g.rewards.length, 0);
+  assert.equal(g.phase, "over");
+});
+test("larger physics dimensions match exported rendering dimensions", () => {
+  const g = fresh();
+  const coin = addPiece(g, "coin", 0, 1, 0).body.shapes[0];
+  const stone = addPiece(g, "stone", 1, 1, 0).body.shapes[0];
+  assert.equal(coin.radiusTop, COIN_RADIUS);
+  assert.equal(coin.height, COIN_HEIGHT);
+  assert.equal(stone.radius, STONE_RADIUS);
+  assert.equal(COIN_RADIUS, 0.28);
+  assert.equal(COIN_HEIGHT, 0.105);
+  assert.equal(STONE_RADIUS, 0.35);
 });
 test("upper shelf supports physical tokens and its retreat drops them to lower level", () => {
   const g = fresh();
@@ -222,7 +271,7 @@ test("piece cap preserves credits and queues an exact reward instead of discardi
   const g = fresh();
   for (let i = 0; i < MAX_PIECES; i++) addPiece(g, "coin", 0, 10 + i, 0);
   assert.equal(shoot(g), false);
-  assert.equal(g.tokens, 50);
+  assert.equal(g.tokens, 30);
   g.rewards.push({ remaining: 15, aim: 0 });
   g.pendingCoins = 15;
   step(g, 1 / 60);

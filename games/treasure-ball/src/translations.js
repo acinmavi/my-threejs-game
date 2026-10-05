@@ -1,5 +1,5 @@
 export const staticPairs = [
-  ["50 CREDITS", "50 CREDIT"],
+  ["30 CREDITS", "30 CREDIT"],
   [
     "♪ Sound: off",
     "♪ Âm thanh: tắt"
@@ -37,16 +37,16 @@ export const staticPairs = [
     "BÓNG LỚN RƠI → VÒNG THƯỞNG"
   ],
   [
-    "50 CREDITS · HUNT GOLD BALLS",
-    "50 CREDIT · SĂN BÓNG VÀNG"
+    "30 CREDITS · HUNT GOLD BALLS",
+    "30 CREDIT · SĂN BÓNG VÀNG"
   ],
   [
     "Treasure awaits.",
     "Kho báu chờ bạn."
   ],
   [
-    "Spend 1 credit to drop a white ball through the peg board. Channels award small balls, big balls, points or keys. Balls land on the pusher: collected small balls award +2 points, and gold balls open the bonus wheel. Every 6 gold balls unlock Super Bonus ×3; 3 keys open a chest. Credits never refill. Zero credits ends the round immediately.",
-    "Mỗi lượt dùng 1 credit để thả bóng trắng qua bảng đinh. Ô trúng thưởng bóng nhỏ, bóng lớn, điểm hoặc chìa khóa. Bóng đổ lên bàn đẩy: bóng nhỏ rơi +2 điểm, bóng vàng rơi mở vòng bonus. Đủ 6 bóng vàng có Super Bonus ×3; 3 chìa mở rương. Credit không tự tăng. Hết credit là game over ngay."
+    "Spend 1 credit to drop a white ball through the peg board. Channels award small balls, big balls, points or keys. Balls land on the pusher: collected small balls award +2 points, and gold balls open the bonus wheel. Every 6 gold balls unlock Super Bonus ×3; 3 keys open a chest. Credits never refill. After the final credit, balls and queued rewards finish before game over.",
+    "Mỗi lượt dùng 1 credit để thả bóng trắng qua bảng đinh. Ô trúng thưởng bóng nhỏ, bóng lớn, điểm hoặc chìa khóa. Bóng đổ lên bàn đẩy: bóng nhỏ rơi +2 điểm, bóng vàng rơi mở vòng bonus. Đủ 6 bóng vàng có Super Bonus ×3; 3 chìa mở rương. Credit không tự tăng. Hết credit vẫn xử lý bóng cuối và phần thưởng rồi mới kết thúc."
   ],
   [
     "Start round →",

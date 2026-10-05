@@ -41,8 +41,8 @@ function fixedBox(world, half, pos, material, type = CANNON.Body.STATIC) {
   world.addBody(body);
   return body;
 }
-export function addBall(game, kind, x, y, z) {
-  if (game.pieces.length >= MAX_PIECES) return null;
+export function addBall(game, kind, x, y, z, overflow = false) {
+  if (game.pieces.length >= MAX_PIECES + (overflow ? 1 : 0)) return null;
   const body = new CANNON.Body({
     mass: kind === "small" ? 1 : 3,
     material: game.material,
@@ -131,7 +131,9 @@ export function createGame(random = Math.random, populated = true) {
     nextId: 0,
     random,
     phase: "ready",
-    tokens: 50,
+    tokens: 30,
+    drainTime: 0,
+    restTime: 0,
     score: 0,
     shots: 0,
     aim: 0,
@@ -214,7 +216,7 @@ export function shoot(game) {
   game.plinkoWorld.addBody(body);
   game.plinkoBalls.push({ id: game.nextId++, body, age: 0, aim: game.aim });
   game.tokens--;
-  if (game.tokens === 0) game.phase = "over";
+  if (game.tokens === 0) game.phase = "settling";
   game.shots++;
   game.cooldown = 0.65;
   game.message = t("The ball is crossing the peg board… wait for the reward channel below.", "Bóng đang qua bảng đinh… chờ ô thưởng bên dưới.");
@@ -268,17 +270,20 @@ function dispense(game, dt) {
   game.dropCooldown = Math.max(0, game.dropCooldown - dt);
   if (
     game.dropCooldown > 0 ||
-    game.pieces.length >= MAX_PIECES ||
+    game.pieces.length >= MAX_PIECES + (game.phase === "settling" ? 1 : 0) ||
     !game.rewards.length
   )
     return;
   const reward = game.rewards[0];
+  // One temporary overflow slot lets a full shelf release queued end-of-round prizes.
+  const overflow = game.phase === "settling" && game.pieces.length >= MAX_PIECES;
   addBall(
     game,
     reward.kind,
     clamp(reward.aim + (game.random() - 0.5) * 0.45, -2, 2),
     reward.kind === "big" ? 1.45 : 1.2,
     -2.25,
+    overflow,
   );
   if (reward.kind === "small") game.pendingSmall--;
   else {
@@ -324,11 +329,8 @@ function spinBonus(game, dt) {
   }
 }
 export function step(game, dt) {
-  if (game.phase !== "playing" || dt <= 0) return;
-  if (game.tokens <= 0) {
-    game.phase = "over";
-    return;
-  }
+  if (!["playing", "settling"].includes(game.phase) || dt <= 0) return;
+  if (game.tokens <= 0) game.phase = "settling";
   game.time += dt;
   game.cooldown = Math.max(0, game.cooldown - dt);
   game.plinkoWorld.step(dt);
@@ -345,7 +347,10 @@ export function step(game, dt) {
     }
   }
   dispense(game, dt);
-  const target = -2.3 + (0.8 * (1 - Math.cos((game.time * TAU) / 3.8))) / 2;
+  const resting = game.phase === "settling" && game.drainTime >= 8;
+  const target = resting
+    ? Math.max(-2.3, game.pusher.position.z - dt * 0.8)
+    : -2.3 + (0.8 * (1 - Math.cos((game.time * TAU) / 3.8))) / 2;
   game.pusher.velocity.z = (target - game.pusher.position.z) / dt;
   if (game.pusher.velocity.z > 0) for (const p of game.pieces) p.body.wakeUp();
   game.world.step(dt);
@@ -358,4 +363,17 @@ export function step(game, dt) {
     }
   }
   spinBonus(game, dt);
+  if (game.phase === "settling") {
+    const pending = game.plinkoBalls.length || game.rewards.length || game.spin || game.bonuses.length;
+    if (pending) {
+      game.drainTime = 0;
+      game.restTime = 0;
+    } else {
+      game.drainTime += dt;
+      if (resting && game.pusher.position.z <= -2.3 + 1e-6) {
+        game.restTime += dt;
+        if (game.restTime >= 2) game.phase = "over";
+      }
+    }
+  }
 }

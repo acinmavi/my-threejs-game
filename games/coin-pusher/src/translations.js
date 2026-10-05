@@ -1,5 +1,5 @@
 export const staticPairs = [
-  ["50 CREDITS", "50 CREDIT"],
+  ["30 CREDITS", "30 CREDIT"],
   [
     "♪ Sound: off",
     "♪ Âm thanh: tắt"
@@ -37,16 +37,16 @@ export const staticPairs = [
     "6 ĐÁ BẤT KỲ → SUPER BONUS"
   ],
   [
-    "50 CREDITS · EVERY STONE COUNTS",
-    "50 CREDIT · ĐÁ NÀO CŨNG TÍNH"
+    "30 CREDITS · EVERY STONE COUNTS",
+    "30 CREDIT · ĐÁ NÀO CŨNG TÍNH"
   ],
   [
     "One more push.",
     "Một cú đẩy nữa."
   ],
   [
-    "Spend 1 credit per shot to fire a token through the wheel. Hit sector 15 to drop 15 extra coins onto the upper shelf. Coins fall from the moving shelf onto the lower table, pushing coins and stones toward the ledge. Every 50 front-coin points releases 1 random stone. Collected coins award points only; credits never refill. Each stone opens a separate bonus wheel for coins, stones or points. Any 6 stones unlock Super Bonus ×3 / Jackpot. Zero credits ends the round immediately.",
-    "Mỗi lần bấm dùng 1 credit để bắn token qua vòng quay. Trúng ô 15 thì thêm 15 xu rơi lên bàn đẩy trên. Xu trên bàn co/duỗi rơi xuống bàn dưới, dồn xu và đá ra mép. Cứ 50 điểm từ xu cửa trước, máy thả thêm 1 đá ngẫu nhiên. Xu rơi chỉ cộng điểm, không hoàn credit. Mỗi đá mở vòng thưởng riêng: xu, đá hoặc điểm; 6 đá bất kỳ mở Super Bonus ×3 / Jackpot. Hết credit là game over ngay."
+    "Spend 1 credit per shot to fire a token through the wheel. Hit sector 15 to drop 15 extra coins onto the upper shelf. Coins fall from the moving shelf onto the lower table, pushing coins and stones toward the ledge. Every 50 front-coin points releases 1 random stone. Collected coins award points only; credits never refill. Each stone opens a separate bonus wheel for coins, stones or points. Any 6 stones unlock Super Bonus ×3 / Jackpot. After the last credit, rewards and final pushes finish before the round ends.",
+    "Mỗi lần bấm dùng 1 credit để bắn token qua vòng quay. Trúng ô 15 thì thêm 15 xu rơi lên bàn đẩy trên. Xu trên bàn co/duỗi rơi xuống bàn dưới, dồn xu và đá ra mép. Cứ 50 điểm từ xu cửa trước, máy thả thêm 1 đá ngẫu nhiên. Xu rơi chỉ cộng điểm, không hoàn credit. Mỗi đá mở vòng thưởng riêng: xu, đá hoặc điểm; 6 đá bất kỳ mở Super Bonus ×3 / Jackpot. Hết credit, máy hoàn tất phần thưởng và lượt đẩy cuối rồi mới kết thúc."
   ],
   [
     "Start round →",
