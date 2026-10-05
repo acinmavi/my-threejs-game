@@ -201,7 +201,6 @@ function resetCompletion(game) {
   game.pusherStopped = false;
 }
 function collect(game, piece, front) {
-  resetCompletion(game);
   if (!front) {
     game.lost++;
     game.message = t("Side gap: item lost.", "Rơi khe bên: mất vật phẩm.");
@@ -211,12 +210,14 @@ function collect(game, piece, front) {
     game.score++;
     game.frontCoins++;
     if (game.frontCoins % STONE_THRESHOLD === 0) {
+      resetCompletion(game);
       game.pendingStones++;
       game.message =
         t("50 front-coin points! The machine releases another random stone.", "Đủ 50 điểm từ xu cửa trước! Máy thả thêm một đá ngẫu nhiên.");
     } else
       game.message = t(`Front coin: +1 point. Stone progress ${game.frontCoins % STONE_THRESHOLD}/${STONE_THRESHOLD} coin points.`, `Xu cửa trước: +1 điểm. Tiến độ đá ${game.frontCoins % STONE_THRESHOLD}/${STONE_THRESHOLD} điểm từ xu.`);
   } else {
+    resetCompletion(game);
     game.collected++;
     game.score += 20;
     game.bonuses.push(false);

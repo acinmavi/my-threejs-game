@@ -215,13 +215,14 @@ test("zero credits allow pending stones and a late collection resets completion"
   assert.equal(g.generatedStones, 1);
   advance(g, 8.1);
   assert.equal(g.pusherStopped, true);
-  fall(g);
+  g.random = () => 0.14;
+  fall(g, "stone", 0, 2.8, 0);
   step(g, 1 / 60);
   assert.equal(g.pusherStopped, false);
-  assert.equal(g.score, 1);
+  assert.equal(g.score, 20);
   advance(g, 9);
   assert.equal(g.phase, "settling");
-  advance(g, 2);
+  advance(g, 5);
   assert.equal(g.phase, "over");
 });
 test("settling full table preserves payouts with one temporary overflow slot", () => {
@@ -303,4 +304,18 @@ test("side walls contain coins and stones; rear shelf stays covered throughout s
   assert.equal(g.lost, 0);
   assert.ok(coin.body.position.y >= 0);
   assert.ok(stone.body.position.y >= 0);
+});
+
+test("ordinary final coin drops score without restarting the stopped pusher", () => {
+  const g = fresh();
+  g.phase = "settling";
+  g.tokens = 0;
+  advance(g, 8.1);
+  assert.equal(g.pusherStopped, true);
+  fall(g);
+  step(g, 1 / 60);
+  assert.equal(g.score, 1);
+  assert.equal(g.pusherStopped, true);
+  advance(g, 2);
+  assert.equal(g.phase, "over");
 });
